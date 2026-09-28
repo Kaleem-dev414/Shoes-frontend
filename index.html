@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
+<!-- backend link for connection -->
   <script>window.SAJID_API_URL = "https://shoes-backend-sb5h.onrender.com/api";</script>
-  
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sajid Shoes | Shop Manager</title>
@@ -2857,6 +2857,7 @@ table{border-spacing:0!important}thead th{background:#f8fafc!important;color:#66
 }
 @media(max-width:350px){#reports .report-stats{grid-template-columns:1fr!important}}
 </style>
+
 
 
 <style>
@@ -11492,3 +11493,127 @@ async function permanentlyClearReport(){if(!await appConfirm('This clears report
 <style>.admin-extra-cards{margin-top:9px}.admin-extra-cards button{text-align:left;cursor:pointer;font:inherit}.admin-section-picker-label{display:block;margin:12px 0;font-weight:800;font-size:12px}.admin-section-picker-label select{display:block;width:100%;max-width:360px;margin-top:6px;padding:10px;border:1px solid #d9e4ee;border-radius:9px;background:#fff}.recovery-record{border:1px solid #e2e8f0;border-radius:12px;padding:10px;margin:8px 0}.recovery-record strong{display:block;margin-bottom:8px}.recovery-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.recovery-fields label{font-size:11px;font-weight:800;color:#475569}.recovery-fields input{display:block;width:100%;margin-top:4px}.low-stock-dismiss{border:1px solid #ddd;background:white;border-radius:7px;padding:4px 8px;cursor:pointer}</style>
 
 <style>.sidebar .brand-icon{width:92px!important;height:92px!important;margin:auto!important;border:0!important;background:transparent!important;box-shadow:none!important}.sidebar .brand-icon img{width:100%!important;height:100%!important;object-fit:contain!important}.sidebar .brand-circle{padding-top:10px!important}</style>
+<style id="mobile-nav-width-fix">
+/* Keep the desktop sidebar intact. On phones, use its existing menu as a fixed strip. */
+@media (max-width: 760px) {
+  html, body, .app {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: clip !important;
+  }
+  body {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .app, .main, .content, .page, .page.active {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  .main {
+    width: 100% !important;
+    margin: 0 !important;
+    overflow-x: clip !important;
+  }
+  .content {
+    width: 100% !important;
+    padding-inline: 10px !important;
+  }
+  .page > *, .stats > *, .grid-2 > *, .pos > *, .card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  /* Tables remain scrollable inside their cards instead of moving the page. */
+  .page .card:has(> table), .table-wrap, .table-responsive,
+  #dashboard .card:has(table) {
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  aside.sidebar#sidebar {
+    display: block !important;
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: calc(70px + env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 0 !important;
+    padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow: hidden !important;
+    z-index: 10000 !important;
+    border-radius: 0 !important;
+    background: linear-gradient(100deg, #102a40, #0c514f) !important;
+  }
+  aside.sidebar#sidebar > .logo {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  aside.sidebar#sidebar > .menu {
+    display: flex !important;
+    flex-flow: row nowrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    padding: 0 2px !important;
+    margin: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+  }
+  aside.sidebar#sidebar > .menu::-webkit-scrollbar { display: none !important; }
+  aside.sidebar#sidebar > .menu button {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 86px !important;
+    max-width: 140px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    margin: 0 !important;
+    padding: 7px 10px !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    border: 0 !important;
+    border-radius: 11px !important;
+  }
+  aside.sidebar#sidebar > .menu #sidebarLogoutBtn {
+    border-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  .mobile-menu { display: none !important; }
+}
+
+@media (max-width: 380px) {
+  .content { padding-inline: 7px !important; }
+  aside.sidebar#sidebar > .menu button {
+    min-width: 80px !important;
+    padding-inline: 8px !important;
+  }
+}
+
+</style>
+<style id="page-horizontal-lock">
+/* Keep the content viewport still while allowing the bottom menu to scroll. */
+@media screen {
+  html, body { max-width: 100%; overflow-x: hidden !important; overscroll-behavior-x: none; }
+  .app, .main, .content, .page, .page.active { min-width: 0 !important; max-width: 100% !important; }
+  .main, .content, .page, .page.active { overflow-x: hidden !important; overscroll-behavior-x: none; }
+  .stats, .grid-2, .pos, .products, .pos-products { min-width: 0 !important; max-width: 100% !important; }
+  .stats > *, .grid-2 > *, .pos > *, .products > *, .pos-products > * { min-width: 0 !important; }
+}
+@media screen and (max-width: 760px) {
+  .app, .main, .content, .page, .page.active { width: 100% !important; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .grid-2, .pos { grid-template-columns: minmax(0, 1fr) !important; }
+  .products, .pos-products { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .page .card:has(table), .table-wrap, .table-responsive { overflow-x: auto !important; }
+}
+</style>
