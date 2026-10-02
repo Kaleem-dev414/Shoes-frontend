@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <!-- backend link for connection -->
-  <script>window.SAJID_API_URL = "https://shoes-backend-sb5h.onrender.com/api";</script>
+  <script>window.SAJID_API_URL = ["localhost","127.0.0.1","::1"].includes(location.hostname)?"/api":"https://shoes-backend-sb5h.onrender.com/api";</script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1587,7 +1587,7 @@ table{width:100%;min-width:650px}
  display:flex;justify-content:space-between;gap:10px;
  font-size:10px;padding:2px 0;
 }
-.bill-preview .receipt-total-line.main{
+.bill-preview .receipt-total-line.receipt-grand-total{
  margin:4px 0;padding:6px 0;border-top:2px solid #111;border-bottom:2px solid #111;
  font-size:16px;font-weight:900;
 }
@@ -7528,7 +7528,7 @@ tr:hover td{background:#f6fbfb}
 </style>
 
 <style>
-.official-shoe-logo{width:100%;height:100%;object-fit:contain;display:block}.auth-brand .shoe{background:transparent!important;overflow:hidden}.receipt-logo{overflow:hidden}.bill-preview .receipt-total-line.main{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}.bill-preview .receipt-total-line.main>span:first-child{flex:0 0 auto!important}.bill-preview .receipt-total-line.main>span:last-child{flex:0 0 auto!important;white-space:nowrap!important;text-align:right!important;font-size:14px!important;line-height:1.3!important}#zeroShopButton{display:none!important}.admin-data-nav{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.admin-data-nav button{padding:7px 11px;border:1px solid #dbe5f0;border-radius:8px;background:#f8fafc;font-weight:800;cursor:pointer}.admin-data-nav button.active{background:#172033;color:white}.admin-section-records{max-height:360px;overflow:auto;overflow-wrap:anywhere;background:#f8fafc;border-radius:12px;padding:10px}.admin-section-records table{width:100%;border-collapse:collapse;font-size:12px}.admin-section-records td,.admin-section-records th{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}
+.official-shoe-logo{width:100%;height:100%;object-fit:contain;display:block}.auth-brand .shoe{background:transparent!important;overflow:hidden}.receipt-logo{overflow:hidden}.bill-preview .receipt-total-line.receipt-grand-total{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}.bill-preview .receipt-total-line.receipt-grand-total>span:first-child{flex:0 0 auto!important}.bill-preview .receipt-total-line.receipt-grand-total>span:last-child{flex:0 0 auto!important;white-space:nowrap!important;text-align:right!important;font-size:14px!important;line-height:1.3!important}#zeroShopButton{display:none!important}.admin-data-nav{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.admin-data-nav button{padding:7px 11px;border:1px solid #dbe5f0;border-radius:8px;background:#f8fafc;font-weight:800;cursor:pointer}.admin-data-nav button.active{background:#172033;color:white}.admin-section-records{max-height:360px;overflow:auto;overflow-wrap:anywhere;background:#f8fafc;border-radius:12px;padding:10px}.admin-section-records table{width:100%;border-collapse:collapse;font-size:12px}.admin-section-records td,.admin-section-records th{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}
 </style>
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png"><link rel="apple-touch-icon" href="/favicon-180.png"><style id="professional-reference-redesign">
 /* Design refresh based on the supplied reference; existing functions retained. */
@@ -7643,24 +7643,19 @@ body.ks-user-session #adminPanel{display:none!important;}
 
 <body>
 <div id="authGate" class="auth-gate">
- <div class="auth-card"><div class="auth-brand"><div class="shoe"><img src="/shoe-logo.png" alt="Shoe logo" class="official-shoe-logo"></div><h2 id="authShopTitle">USERS ACCOUNT</h2><p>Secure account access</p></div>
- <div class="auth-tabs"><button id="userTab" class="active" onclick="setLoginRole('user')">User</button><button id="adminTab" onclick="setLoginRole('admin')">Admin</button></div>
- <div class="auth-field"><label>Email or Username</label><input id="loginUsername" class="input" autocomplete="username"></div>
+ <div class="auth-card"><div class="auth-brand"><h2 id="authShopTitle">USERS ACCOUNT</h2><p>Secure account access</p></div>
  
- <div class="auth-field"><label>Password</label><input id="loginPassword" class="input" type="password" autocomplete="current-password"></div>
+ <div class="auth-field"><label>Email or Username</label><input id="loginUsername" class="input" autocomplete="username" oninput="detectAdminLogin()"></div>
+ 
+ <div class="auth-field"><label>Password</label><input id="loginPassword" class="input" oninput="adminTempToken=''" type="password" autocomplete="current-password"></div>
  <div id="adminPinWrap" class="auth-field" style="display:none"><label>Private 6-digit code</label><input id="adminPin" class="input pin-dots" type="password" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></div>
  <button class="auth-primary" onclick="doLogin()">Login</button><div class="auth-actions"><button type="button" id="registerBtn" class="auth-link" onclick="openRegistration()">Create user account</button><button type="button" id="forgotPasswordBtn" class="auth-link" onclick="loginRole==='admin'?openAdminPasswordReset():openForgotPassword()">Forgot password?</button></div><div id="authMsg" class="auth-msg"></div>
  </div>
 </div>
-<div id="adminPanel" class="admin-panel" style="display:none"><div class="admin-shell"><div class="admin-top"><div><h1>Admin Control Center</h1><p>Users, permissions, protected backups and password requests.</p></div><div class="admin-top-actions"><button class="btn" onclick="openAdminPasswordReset()">Reset Admin Password</button><button class="btn red" onclick="logoutApp()">Logout</button></div></div><div class="admin-section" id="deletedUserRecoverySection" hidden style="display:none"><div class="admin-section-title"><div><h2>Protected Deleted-Account Data</h2><span>Deleting an account never deletes its final admin recovery copy.</span></div><button class="btn" type="button" onclick="loadDeletedUserRecoveries()">View Protected Records</button></div><div id="deletedUserRecoveryList" class="deleted-user-recovery-list"><p>Select View Protected Records to inspect deleted users.</p></div></div><div class="admin-section"><div class="admin-section-title"><h2>User Accounts</h2><span>Control access and restore saved data</span></div><div id="adminUsers"></div></div><div class="admin-section"><div class="admin-section-title"><h2>Password Reset Requests</h2><span>Approval opens a 2-minute reset window</span></div><div id="adminResetRequests"></div><div class="admin-section-title" style="margin-top:18px"><h2>Shop Reset Approval Requests</h2></div><div id="shopResetRequests"></div></div></div></div>
+<div id="adminPanel" class="admin-panel" style="display:none"><div class="admin-shell"><div class="admin-top"><div><h1>Admin Control Center</h1><p>Users, permissions, protected backups and password requests.</p></div><div class="admin-top-actions"><button class="btn" onclick="openAdminPasswordReset()">Reset Admin Password</button><button class="btn red" onclick="logoutApp()">Logout</button></div></div><div class="admin-section" id="deletedUserRecoverySection" hidden style="display:none"><div class="admin-section-title"><div><h2>Protected Deleted-Account Data</h2><span>Deleting an account never deletes its final admin recovery copy.</span></div><button class="btn" type="button" onclick="loadDeletedUserRecoveries()">View Protected Records</button></div><div id="deletedUserRecoveryList" class="deleted-user-recovery-list"><p>Select View Protected Records to inspect deleted users.</p></div></div><div class="admin-section"><div class="admin-section-title"><h2>User Accounts</h2><span>Control access and restore saved data</span></div><div id="adminUsers"></div></div><div class="admin-section"><div class="admin-section-title"><h2>Password Reset Requests</h2><span>Approval opens a 2-minute reset window</span></div><div id="adminResetRequests"></div></div></div></div>
 
 <div class="app">
-<aside class="sidebar" id="sidebar"><div class="logo">
-      <div class="brand-circle">
-        <div class="brand-icon"><img src="/shoe-logo.png" alt="Official shoe logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%"></div>
-        <div class="brand-name" data-shop-name>SAJID SHOES</div>
-      </div>
-    </div><div class="menu">
+<aside class="sidebar" id="sidebar"><div class="menu">
 <button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button><button onclick="showPage('sale',this)">🛒 Sale</button><button onclick="showPage('products',this)">👟 Products</button><button onclick="showPage('stock',this)">📦 Stock</button><button onclick="showPage('purchases',this)">🛍️ Purchases</button><button onclick="showPage('customers',this)">👥 Customers</button><button onclick="showPage('khata',this)">📒 Kahta</button><button onclick="showPage('bills',this)">🧾 Bills</button><button onclick="showPage('income',this)">💰 Income / Expenses</button><button onclick="showPage('reports',this)">📊 Reports</button><button type="button" id="sidebarLogoutBtn" onclick="logoutApp()" style="color:#fecaca;border-top:1px solid rgba(255,255,255,.10);margin-top:8px">🚪 Logout</button>
 </div></aside>
 <main class="main"><header class="header"><div style="display:flex;align-items:center;gap:10px"><button class="mobile-menu" onclick="toggleMenu()">☰</button><h2 id="headerTitle">Dashboard</h2></div><div style="display:flex;align-items:center;gap:8px"><div id="userHeaderActions" style="display:none;align-items:center;gap:10px"><span id="loggedInUserName" style="font-weight:800;color:#172033"></span></div>
@@ -7668,7 +7663,7 @@ body.ks-user-session #adminPanel{display:none!important;}
 <section class="page active" id="dashboard"><div class="card account-recovery-card professional-recovery"><div class="recovery-heading"><div class="recovery-folder">📁</div><div><h2>Restore Account Backup</h2><p>Upload a backup supplied by your administrator. Existing data is protected until validation completes.</p></div></div><label class="recovery-dropzone" for="accountBackupFile"><span class="upload-circle">☁</span><span class="recovery-drop-text"><strong>Choose your backup file</strong><small>JSON or a restorable PDF exported by this application</small></span><span class="recovery-choose">📂 Choose File</span></label><input type="file" id="accountBackupFile" accept=".json,.pdf,application/json,application/pdf" class="recovery-file-input" onchange="document.getElementById('recoveryFilename').textContent=this.files?.[0]?.name||'No file selected'"/><div id="recoveryFilename" class="recovery-filename" aria-live="polite">No file selected</div><div class="recovery-action-buttons"><button type="button" class="btn green" onclick="importAccountBackup()">☁ Upload &amp; Restore <small>Restore from selected backup</small></button><button type="button" class="btn" onclick="requestShopResetApproval()">ⓘ Ask Admin to Reset Shop <small>Request administrator approval</small></button><button id="userAuthorizedReset" class="btn red" style="display:none" onclick="resetAuthorizedUserShop()">Reset User Shop</button></div><div id="backupImportStatus" class="recovery-status" role="status"></div></div><div class="stats">
 <div class="stat"><div class="icon">💵</div><p>All Sales</p><h2 id="todaySales">Rs 0</h2></div><div class="stat"><div class="icon">📈</div><p>Gross Profit</p><h2 id="todayProfit">Rs 0</h2></div><div class="stat dashboard-money-stat"><div class="icon">💰</div><p>Income / Expenses</p><h2 id="expenseTotal">Rs 0 / Rs 0</h2></div><div class="stat"><div class="icon">📒</div><p>Customer Kahta</p><h2 id="khataTotal">Rs 0</h2></div><div class="stat"><div class="icon">👟</div><p>Products</p><h2 id="productCount">0</h2></div><div class="stat"><div class="icon">📦</div><p>Total Stock</p><h2 id="stockCount">0 Pairs</h2></div><div class="stat"><div class="icon">👥</div><p>Customers</p><h2 id="customerCount">0</h2></div><div class="stat"><div class="icon">🧾</div><p>Total Bills</p><h2 id="billCount">0</h2></div>
 </div><div class="grid-2"><div class="card"><h3>Recent Sales</h3><br><div style="overflow:auto"><table><thead><tr><th>Bill</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody id="recentSales"></tbody></table></div></div><div class="card"><h3>⚠️ Low Stock</h3><br><div id="lowStock"></div></div></div></section>
-<section class="page" id="sale"><div id="saleTopAnchor"></div><div class="page-title"></div><div class="sale-jump-wrap"><button type="button" class="sale-jump-btn" onclick="jumpSaleBottom()">↓ Go to End of Sale</button></div><div class="pos"><div><input class="input" id="posSearch" placeholder="🔍 Search shoe name or code..." oninput="renderPOS()"><div class="pos-products" id="posProducts"></div></div><div class="card cart"><div class="bill-brand"><div class="bill-brand-logo"><img src="/shoe-logo.png" alt="Shoe logo" class="official-shoe-logo"></div><div><div class="bill-brand-name" data-shop-name>SAJID SHOES</div><div class="bill-brand-sub">Shoe Shop & Footwear</div></div></div><div class="bill-approved-contact"><div class="bill-approved-item"><span>📍 SHOP ADDRESS</span><strong id="billHeaderAddress">Awaiting admin-approved address</strong><button type="button" class="bill-contact-dot" title="Request admin approval to change shop address" aria-label="Request shop address change" onclick="requestShopAddressChange()">⋯</button></div><div class="bill-approved-item"><span>☎ SHOP CONTACT</span><strong id="billHeaderPhone">Awaiting admin-approved number</strong><button type="button" class="bill-contact-dot" title="Request admin approval to edit shop address or number" aria-label="Request shop contact change" onclick="requestShopContactChange()">⋯</button></div></div><h2>🛒 Current Bill</h2><div id="cartItems" style="margin-top:8px"></div><div class="total-row"><span>Subtotal</span><strong id="subtotal">Rs 0</strong></div><div class="form-group"><label>Discount</label><input class="input" type="number" id="discount" value="0" oninput="updateCart()"></div><div class="total-row grand"><span>Total</span><span id="grandTotal">Rs 0</span></div><div class="form-group"><label>Customer Name</label><input class="input" id="saleCustomerName" placeholder="Enter customer name manually" autocomplete="off"></div><div class="customer-bill-contact"><div class="form-group"><label>Customer Address</label><input class="input" id="saleCustomerAddress" placeholder="Customer delivery / billing address" autocomplete="off"></div><div class="form-group"><label>Customer Contact Number</label><input class="input" id="saleCustomerPhone" type="tel" placeholder="Customer phone number" autocomplete="off"></div></div><div class="form-group"><label>Paid Amount</label><input class="input" type="number" id="paidAmount" placeholder="Enter paid amount" onfocus="if(this.value==='0')this.value=''" oninput="this.value=this.value.replace(/^0+(?=\d)/,'');updateCart()"></div><div class="total-row"><span>Remaining / Kahta</span><strong class="balance-red" id="remaining">Rs 0</strong></div><button class="btn green" style="width:100%;margin-top:10px" onclick="completeSale()">💾 Save & Print Bill</button></div></div><div id="saleBottomAnchor"></div><div class="sale-jump-wrap sale-jump-bottom"><button type="button" class="sale-jump-btn" onclick="jumpSaleTop()">↑ Back to Top of Sale</button></div></section>
+<section class="page" id="sale"><div id="saleTopAnchor"></div><div class="page-title"></div><div class="sale-jump-wrap"><button type="button" class="sale-jump-btn" onclick="jumpSaleBottom()">↓ Go to End of Sale</button></div><div class="pos"><div><input class="input" id="posSearch" placeholder="🔍 Search shoe name or code..." oninput="renderPOS()"><div class="pos-products" id="posProducts"></div></div><div class="card cart"><div class="bill-brand"><div><div class="bill-brand-name" data-shop-name>SAJID SHOES</div><div class="bill-brand-sub">Shoe Shop & Footwear</div></div></div><div class="bill-approved-contact"><div class="bill-approved-item"><span>📍 SHOP ADDRESS</span><strong id="billHeaderAddress">Awaiting admin-approved address</strong></div><div class="bill-approved-item"><span>☎ SHOP CONTACT</span><strong id="billHeaderPhone">Awaiting admin-approved number</strong><button type="button" class="bill-contact-dot" title="Request admin approval to edit shop address or number" aria-label="Request shop contact change" onclick="requestShopContactChange()">⋯</button></div></div><h2>🛒 Current Bill</h2><div class="form-group"><label for="billHandledBy">Bill handled by</label><input class="input" id="billHandledBy" placeholder="Enter staff name" maxlength="100" autocomplete="name"></div><div id="cartItems" style="margin-top:8px"></div><div class="total-row"><span>Subtotal</span><strong id="subtotal">Rs 0</strong></div><div class="form-group"><label>Discount</label><input class="input" type="number" id="discount" value="0" oninput="updateCart()"></div><div class="total-row grand"><span>Total</span><span id="grandTotal">Rs 0</span></div><div class="form-group"><label>Customer Name</label><input class="input" id="saleCustomerName" placeholder="Enter customer name manually" autocomplete="off"></div><div class="customer-bill-contact"><div class="form-group"><label>Customer Address</label><input class="input" id="saleCustomerAddress" placeholder="Customer delivery / billing address" autocomplete="off"></div><div class="form-group"><label>Customer Contact Number</label><input class="input" id="saleCustomerPhone" type="tel" placeholder="Customer phone number" autocomplete="off"></div></div><div class="form-group"><label>Paid Amount</label><input class="input" type="number" id="paidAmount" placeholder="Enter paid amount" onfocus="if(this.value==='0')this.value=''" oninput="this.value=this.value.replace(/^0+(?=\d)/,'');updateCart()"></div><div class="total-row"><span>Remaining / Kahta</span><strong class="balance-red" id="remaining">Rs 0</strong></div><button class="btn green" style="width:100%;margin-top:10px" onclick="completeSale()">💾 Save & Print Bill</button></div></div><div id="saleBottomAnchor"></div><div class="sale-jump-wrap sale-jump-bottom"><button type="button" class="sale-jump-btn" onclick="jumpSaleTop()">↑ Back to Top of Sale</button></div></section>
 <section class="page" id="products"><div class="page-title"><h1>Products</h1><p>Manage products, prices and available stock.</p></div><div class="toolbar"><input class="input" id="productSearch" placeholder="Search products..." oninput="renderProducts()"><button class="btn orange" onclick="openProductModal()">+ Add Product</button></div><div class="products" id="productGrid"></div></section>
 <section class="page" id="stock"><div class="page-title"><h1>Stock Counting</h1><p>Count and manage every product size from one place.</p></div>
 <div class="stats" style="grid-template-columns:repeat(3,1fr)">
@@ -7866,6 +7861,15 @@ body.ks-user-session #adminPanel{display:none!important;}
       </div>
     </div>
   </div>
+<div class="hh-panel" id="handlerPanel">
+<div class="hh-header"><div class="hh-heading-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h4M10 12h6M10 16h6"/></svg></div><div class="hh-title"><h2>Bill Handler History</h2><p>Track staff sales, collections and outstanding balances</p></div><button type="button" id="handlerToggle" class="hh-toggle" aria-controls="handlerHistory" aria-expanded="false" onclick="toggleHandlerHistory()"><span>Show history</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
+<div id="handlerHistory" hidden>
+<div class="hh-filters"><label>Period<select id="handlerPeriod" onchange="renderHandlerHistory()"><option value="day">Daily</option><option value="week">Weekly</option><option value="month">Monthly</option><option value="year">Yearly</option><option value="all" selected>All time</option><option value="manual">Manual range</option></select></label><label>From date<input type="date" id="handlerFrom" onchange="document.getElementById('handlerPeriod').value='manual';renderHandlerHistory()"></label><label>To date<input type="date" id="handlerTo" onchange="document.getElementById('handlerPeriod').value='manual';renderHandlerHistory()"></label><label>Search<span class="hh-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="handlerSearch" placeholder="Staff, customer, invoice, phone or shoe" oninput="renderHandlerHistory()"></span></label></div>
+<div class="hh-stats"><div class="hh-stat hh-blue"><span class="hh-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h4M10 12h6M10 16h6"/></svg></span><div><span class="hh-stat-label">Bills handled</span><strong id="handlerCount">0</strong></div></div><div class="hh-stat hh-purple"><span class="hh-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20v-6M12 20V9M19 20V3"/></svg></span><div><span class="hh-stat-label">Net sales</span><strong id="handlerSales">Rs 0</strong></div></div><div class="hh-stat hh-green"><span class="hh-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M12 5v4M10.5 6h2M3 18l5-3 5 1c2 .4 2 3 0 3h-3M3 21l5-2 6 2 7-5c1.5-1 .5-3-1-2l-4 2"/></svg></span><div><span class="hh-stat-label">Received</span><strong id="handlerPaid">Rs 0</strong></div></div><div class="hh-stat hh-amber"><span class="hh-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></span><div><span class="hh-stat-label">Remaining</span><strong id="handlerDue">Rs 0</strong></div></div></div><div id="handlerSummary" class="hh-sr-only" aria-live="polite"></div>
+<div class="hh-table-card"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M17 4a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5v2"/></svg> Staff summary</h3><div class="hh-table-scroll"><table><thead><tr><th>Staff</th><th>Bills</th><th>Net sales</th><th>Received</th><th>Remaining</th></tr></thead><tbody id="handlerGroups"></tbody></table></div></div>
+<div class="hh-table-card"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h4M10 12h6M10 16h6"/></svg> Bill details</h3><div class="hh-table-scroll"><table><thead><tr><th>Bill / date</th><th>Handled by</th><th>Customer</th><th>Net total</th><th>Received</th><th>Outstanding</th></tr></thead><tbody id="handlerRows"></tbody></table></div></div>
+<p class="hh-footnote"><span aria-hidden="true">ⓘ</span> Grouped by bill date. Amounts reflect later payments and returns. Earlier bills without a staff name show “Not recorded”.</p>
+</div></div>
 </section>
 
 
@@ -8024,11 +8028,41 @@ async function deleteProduct(id){
   renderAll();
 }
 
-function renderPOS(){let s=(document.getElementById("posSearch")?.value||"").toLowerCase(),a=document.getElementById("posProducts");a.innerHTML="";products.filter(p=>p.name.toLowerCase().includes(s)||p.code.toLowerCase().includes(s)).forEach(p=>{a.innerHTML+=`<div class="pos-item"><div class="shoe">${p.image?`<img src="${p.image}">`:"👟"}</div><h4>${p.name}</h4><small>${p.code}</small><div class="price">${money(p.price)}</div><select id="size-${p.id}">${Object.keys(p.stock).map(s=>`<option value="${s}">Size ${s} (${p.stock[s]} left)</option>`).join("")}</select><button class="btn orange" style="width:100%;margin-top:5px" onclick="addToCart(${p.id})">+ Add</button></div>`})}
-function addToCart(id){let p=products.find(x=>x.id===id),size=document.getElementById("size-"+id).value;if(p.stock[size]<=0)return appAlert("This size is out of stock.");let e=cart.find(x=>x.id===id&&x.size===size);if(e){if(e.qty>=p.stock[size])return appAlert("No more stock available.");e.qty++}else cart.push({id:p.id,name:p.name,code:p.code,image:p.image||"",size,qty:1,price:p.price,purchase:p.purchase});updateCart()}
+function saleStock(p,size){return Math.max(0,Math.floor(Number(p?.stock?.[size])||0));}
+function saleReserved(id,size){return cart.filter(x=>x.id===id&&String(x.size)===String(size)).reduce((n,x)=>n+Number(x.qty||0),0);}
+function renderPOS(){
+ const q=(document.getElementById('posSearch')?.value||'').trim().toLowerCase(),box=document.getElementById('posProducts');if(!box)return;
+ box.innerHTML=products.filter(p=>String(p.name||'').toLowerCase().includes(q)||String(p.code||'').toLowerCase().includes(q)).map(p=>{
+ const sizes=Object.keys(p.stock||{}),first=sizes.find(size=>saleStock(p,size)>saleReserved(p.id,size))||sizes[0];
+ return `<div class="pos-item"><button type="button" class="shoe sale-photo" onclick="addToCart(${p.id})" aria-label="Add ${escapeHtml(p.name)}"><span>${p.image?`<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async">`:'👟'}</span></button><h4>${escapeHtml(p.name)}</h4><small>${escapeHtml(p.code)}</small><div class="price">${money(p.price)}</div><select id="size-${p.id}" aria-label="Shoe size" onchange="refreshSaleCard(${p.id})">${sizes.length?sizes.map(size=>`<option value="${escapeHtml(size)}" ${size===first?'selected':''}>Size ${escapeHtml(size)} (${Math.max(0,saleStock(p,size)-saleReserved(p.id,size))} left)</option>`).join(''):'<option value="">No stock</option>'}</select><div class="sale-stock-label" id="stock-${p.id}"></div><div class="sale-quantity"><button type="button" onclick="stepSaleQuantity(${p.id},-1)" aria-label="Decrease quantity">−</button><input type="number" id="qty-${p.id}" min="1" step="1" value="1" aria-label="Quantity" oninput="validateSaleQuantity(${p.id})"><button type="button" onclick="stepSaleQuantity(${p.id},1)" aria-label="Increase quantity">+</button></div><button type="button" id="add-${p.id}" class="btn orange" style="width:100%;margin-top:5px" onclick="addToCart(${p.id})">+ Add</button></div>`;
+ }).join('')||'<div class="design-empty">No matching shoes.</div>';products.forEach(p=>refreshSaleCard(p.id));
+}
+function refreshSaleCard(id){
+ const p=products.find(x=>x.id===id),select=document.getElementById('size-'+id),qty=document.getElementById('qty-'+id);if(!p||!select||!qty)return;
+ const left=Math.max(0,saleStock(p,select.value)-saleReserved(id,select.value));
+ for(const option of select.options)if(option.value)option.textContent='Size '+option.value+' ('+Math.max(0,saleStock(p,option.value)-saleReserved(id,option.value))+' left)';
+ const label=document.getElementById('stock-'+id);label.textContent=left?left+' pairs available':'Out of stock';label.classList.toggle('out-of-stock',!left);
+ qty.max=String(left);qty.disabled=!left;qty.value=left?Math.min(left,Math.max(1,Math.floor(Number(qty.value)||1))):0;
+ document.getElementById('add-'+id).textContent=left?'+ Add':'Out of stock';
+ const buttons=qty.parentElement.querySelectorAll('button');buttons[0].disabled=!left||Number(qty.value)<=1;buttons[1].disabled=!left||Number(qty.value)>=left;
+}
+function validateSaleQuantity(id){refreshSaleCard(id);}
+function stepSaleQuantity(id,delta){const input=document.getElementById('qty-'+id);if(!input)return;input.value=Number(input.value||1)+delta;refreshSaleCard(id);}
+function addToCart(id){
+ const p=products.find(x=>x.id===id),size=document.getElementById('size-'+id)?.value;if(!p)return;
+ const left=Math.max(0,saleStock(p,size)-saleReserved(id,size));if(!left)return appAlert('Out of stock. This shoe size is unavailable.');
+ const qty=Math.max(1,Math.floor(Number(document.getElementById('qty-'+id)?.value)||1));if(qty>left)return appAlert('Only '+left+' pairs available in this size.');
+ const item=cart.find(x=>x.id===id&&String(x.size)===String(size));if(item)item.qty+=qty;else cart.push({id:p.id,name:p.name,code:p.code,image:p.image||'',size,qty,price:p.price,purchase:p.purchase});
+ updateCart();
+}
+function changeCartQuantity(index,delta){
+ const item=cart[index];if(!item)return;const p=products.find(x=>x.id===item.id);const qty=item.qty+delta;
+ if(qty>saleStock(p,item.size))return appAlert('No more stock available for this size.');
+ if(qty<=0)cart.splice(index,1);else item.qty=qty;updateCart();
+}
 function removeCart(i){cart.splice(i,1);updateCart()}
-function updateCart(){let a=document.getElementById("cartItems");a.innerHTML=cart.length?cart.map((x,i)=>{let p=products.find(p=>p.id===x.id),img=x.image||(p&&p.image)||"",code=x.code||(p&&p.code)||"";return `<div class="cart-product-row"><div class="cart-product-image">${img?`<img src="${img}" alt="${x.name}">`:"👟"}</div><div class="cart-product-info"><div class="cart-product-name">${x.name}</div><div class="cart-product-meta">${code?code+" • ":""}Size ${x.size} • ${x.qty} × ${money(x.price)}</div><div class="cart-product-bottom"><b>${money(x.qty*x.price)}</b><button class="cart-remove" onclick="removeCart(${i})">🗑 Remove</button></div></div></div>`}).join(""):"<p style='color:#6b7280;padding:15px 0'>Cart is empty.</p>";let sub=cart.reduce((s,x)=>s+x.qty*x.price,0),d=Math.max(0,Number(document.getElementById("discount")?.value||0)),t=Math.max(0,sub-d),paid=Math.max(0,Number(document.getElementById("paidAmount")?.value||0));document.getElementById("subtotal").textContent=money(sub);document.getElementById("grandTotal").textContent=money(t);document.getElementById("remaining").textContent=money(Math.max(0,t-paid))}
-function completeSale(){if(!cart.length)return appAlert("Please add at least one product.");let sub=cart.reduce((s,x)=>s+x.qty*x.price,0),d=Math.max(0,Number(document.getElementById("discount").value||0));if(d>sub)return appAlert("Discount cannot be greater than subtotal.");let t=Math.max(0,sub-d),paid=Math.min(Math.max(0,Number(document.getElementById("paidAmount").value||0)),t),rem=t-paid,customerName=(document.getElementById("saleCustomerName")?.value||"").trim()||"Cash Customer",c=customers.find(x=>x.name.toLowerCase()===customerName.toLowerCase());if(!c){c={id:Date.now(),name:customerName,phone:"",balance:0};customers.push(c)}c.phone=(document.getElementById("saleCustomerPhone")?.value||c.phone||"").trim();c.address=(document.getElementById("saleCustomerAddress")?.value||c.address||"").trim();let cid=c.id;for(let i of cart){let p=products.find(x=>x.id===i.id);if(p.stock[i.size]<i.qty)return appAlert("Not enough stock.")}cart.forEach(i=>products.find(x=>x.id===i.id).stock[i.size]-=i.qty);if(rem>0)c.balance+=rem;let b={id:Date.now(),number:"INV-"+String(bills.length+1).padStart(5,"0"),date:new Date().toLocaleString(),customerId:cid,customer:c.name,customerAddress:c.address||"",customerPhone:c.phone||"",items:JSON.parse(JSON.stringify(cart)),subtotal:sub,discount:d,total:t,paid,remaining:rem};bills.unshift(b);if(paid>0)incomes.unshift({id:'sale-'+b.id,billId:b.id,desc:'Sale '+b.number,amount:paid,date:b.date,type:'sale'});save();cart=[];document.getElementById("discount").value=0;document.getElementById("paidAmount").value="";if(document.getElementById("saleCustomerName"))document.getElementById("saleCustomerName").value="";for(const id of ["saleCustomerAddress","saleCustomerPhone"]){const el=document.getElementById(id);if(el)el.value="";}updateCart();renderAll();showBill(b.id)}
+function updateCart(){let a=document.getElementById("cartItems");a.innerHTML=cart.length?cart.map((x,i)=>{let p=products.find(p=>p.id===x.id),img=x.image||(p&&p.image)||"",code=x.code||(p&&p.code)||"";return `<div class="cart-product-row"><div class="cart-product-image">${img?`<img src="${img}" alt="${x.name}">`:"👟"}</div><div class="cart-product-info"><div class="cart-product-name">${x.name}</div><div class="cart-product-meta">${code?code+" • ":""}Size ${x.size} • ${x.qty} × ${money(x.price)}</div><div class="cart-product-bottom"><b>${money(x.qty*x.price)}</b><div class="cart-quantity"><button type="button" onclick="changeCartQuantity(${i},-1)" aria-label="Decrease bill quantity">−</button><strong>${x.qty}</strong><button type="button" onclick="changeCartQuantity(${i},1)" aria-label="Increase bill quantity" ${x.qty>=saleStock(p,x.size)?"disabled":""}>+</button></div><button class="cart-remove" onclick="removeCart(${i})">🗑 Remove</button></div></div></div>`}).join(""):"<p style='color:#6b7280;padding:15px 0'>Cart is empty.</p>";let sub=cart.reduce((s,x)=>s+x.qty*x.price,0),d=Math.max(0,Number(document.getElementById("discount")?.value||0)),t=Math.max(0,sub-d),paid=Math.max(0,Number(document.getElementById("paidAmount")?.value||0));document.getElementById("subtotal").textContent=money(sub);document.getElementById("grandTotal").textContent=money(t);document.getElementById("remaining").textContent=money(Math.max(0,t-paid));products.forEach(p=>refreshSaleCard(p.id))}
+function completeSale(){if(!accountLoaded)return appAlert('Please sign in and load account data first.');const handler=(document.getElementById('billHandledBy')?.value||'').trim();if(!handler)return appAlert('Enter the name in Bill handled by.');for(const i of cart){const p=products.find(p=>p.id===i.id);if(!p||!Number.isFinite(i.qty)||i.qty<=0||Number(p.stock?.[i.size]||0)<i.qty)return appAlert('Not enough stock.');}if(!cart.length)return appAlert("Please add at least one product.");let sub=cart.reduce((s,x)=>s+x.qty*x.price,0),d=Math.max(0,Number(document.getElementById("discount").value||0));if(!Number.isFinite(sub)||!Number.isFinite(d)||!Number.isFinite(Number(document.getElementById("paidAmount").value||0)))return appAlert("Enter valid amounts.");if(d>sub)return appAlert("Discount cannot be greater than subtotal.");let t=Math.max(0,sub-d),paid=Math.min(Math.max(0,Number(document.getElementById("paidAmount").value||0)),t),rem=t-paid,customerName=(document.getElementById("saleCustomerName")?.value||"").trim()||"Cash Customer",c=customers.find(x=>x.name.toLowerCase()===customerName.toLowerCase());if(!c){c={id:Date.now(),name:customerName,phone:"",balance:0};customers.push(c)}c.phone=(document.getElementById("saleCustomerPhone")?.value||c.phone||"").trim();c.address=(document.getElementById("saleCustomerAddress")?.value||c.address||"").trim();let cid=c.id;for(let i of cart){let p=products.find(x=>x.id===i.id);if(p.stock[i.size]<i.qty)return appAlert("Not enough stock.")}cart.forEach(i=>products.find(x=>x.id===i.id).stock[i.size]-=i.qty);if(rem>0)c.balance+=rem;let b={handledBy:handler,id:Date.now(),number:"INV-"+String(Math.max(0,...bills.map(x=>Number(String(x.number).replace(/\D/g,""))||0))+1).padStart(5,"0"),date:new Date().toISOString(),customerId:cid,customer:c.name,customerAddress:c.address||"",customerPhone:c.phone||"",items:JSON.parse(JSON.stringify(cart)),subtotal:sub,discount:d,total:t,paid,remaining:rem};bills.unshift(b);if(paid>0)incomes.unshift({id:'sale-'+b.id,billId:b.id,desc:'Sale '+b.number,amount:paid,date:b.date,type:'sale'});save();cart=[];document.getElementById("discount").value=0;document.getElementById("paidAmount").value="";if(document.getElementById("saleCustomerName"))document.getElementById("saleCustomerName").value="";for(const id of ["saleCustomerAddress","saleCustomerPhone"]){const el=document.getElementById(id);if(el)el.value="";}updateCart();renderAll();showBill(b.id)}
 function renderCustomers(){
 document.getElementById("customerList").innerHTML=customers.filter(c=>{
  let q=(document.getElementById("customerNameSearch")?.value||"").trim().toLowerCase();
@@ -8138,7 +8172,7 @@ async function receivePayment(id){
  save();renderAll();appNotice(`Payment saved. Remaining Kahta: ${money(c.balance)}`,'success');
 }
 
-function renderBills(list=bills){const table=document.getElementById("billTable");if(!table)return;table.innerHTML=list.length?list.map(b=>`<tr><td>${b.number}${b.returns?.length?`<div class="return-badge">↩ ${b.returns.length} return${b.returns.length>1?"s":""}</div>`:""}</td><td>${b.date}</td><td>${b.customer}</td><td>${money(billAmounts(b).total)}</td><td>${money(billAmounts(b).paid)}</td><td>${money(billAmounts(b).remaining)}</td><td><div class="bill-actions"><button type="button" class="btn" onclick="showBill(${b.id})">View</button><button type="button" class="btn return-btn" onclick="returnBillItems(${b.id})">↩ Return</button><button type="button" class="btn red" onclick="deleteBill(${b.id})">🗑 Delete</button></div></td></tr>`).join(""):`<tr><td colspan="7" style="text-align:center;padding:24px;color:#6b7280">No bill found for this customer.</td></tr>`}
+function renderBills(list=bills){const table=document.getElementById("billTable");if(!table)return;table.innerHTML=list.length?list.map(b=>`<tr><td>${b.number}${b.returns?.length?`<div class="return-badge">↩ ${b.returns.length} return${b.returns.length>1?"s":""}</div>`:""}</td><td>${escapeHtml(reportDateObject(b.date)?.toLocaleDateString()||b.date)}</td><td>${escapeHtml(b.customer)}</td><td>${money(billAmounts(b).total)}</td><td>${money(billAmounts(b).paid)}</td><td>${money(billAmounts(b).remaining)}</td><td><div class="bill-actions"><button type="button" class="btn" onclick="showBill(${b.id})">View</button><button type="button" class="btn return-btn" onclick="returnBillItems(${b.id})">↩ Return</button><button type="button" class="btn red" onclick="deleteBill(${b.id})">🗑 Delete</button></div></td></tr>`).join(""):`<tr><td colspan="7" style="text-align:center;padding:24px;color:#6b7280">No bill found for this customer.</td></tr>`}
 function searchBillsByCustomer(){const input=document.getElementById("billCustomerSearch");const q=(input?.value||"").trim().toLowerCase();if(!q){renderBills(bills);return;}renderBills(bills.filter(b=>String(b.customer||"").toLowerCase().includes(q)));}
 function returnBillItems(id){
  const b=bills.find(x=>x.id===id);
@@ -8214,7 +8248,7 @@ function showBill(id){
  let b=bills.find(x=>x.id===id);if(!b)return;
  let dt=b.date||new Date().toLocaleString();const figures=billAmounts(b);
  const itemCode=i=>i.code||(products.find(p=>p.id===i.id)?.code)||"-";
- document.getElementById("billPreview").innerHTML=`<div class="receipt-logo"><img src="/shoe-logo.png" alt="Shoe logo" class="official-shoe-logo"></div><div class="receipt-title">${escapeHtml(window.currentShopName||"Sajid Shoes")}</div><div class="receipt-sub">QUALITY FOOTWEAR • SALES RECEIPT</div><div class="receipt-shop-contact">${escapeHtml(JSON.parse(localStorage.getItem('sajid_auth_user')||'{}').shopAddress||'')}${JSON.parse(localStorage.getItem('sajid_auth_user')||'{}').shopContact?' • '+escapeHtml(JSON.parse(localStorage.getItem('sajid_auth_user')||'{}').shopContact):''}</div><div class="receipt-rule"></div><div class="receipt-info"><div><b>Bill:</b> ${b.number}</div><div style="text-align:right"><b>Date:</b> ${dt}</div><div class="full"><b>Customer:</b> ${escapeHtml(b.customer||"Cash Customer")}</div>${b.customerAddress?`<div class="full"><b>Address:</b> ${escapeHtml(b.customerAddress)}</div>`:""}${b.customerPhone?`<div class="full"><b>Contact:</b> ${escapeHtml(b.customerPhone)}</div>`:""}</div><div class="receipt-rule"></div><div class="receipt-head"><span>Code</span><span>Product</span><span style="text-align:center">Size</span><span style="text-align:center">Qty</span><span style="text-align:right">Amount</span></div>${b.items.map(i=>`<div class="receipt-product"><span>${itemCode(i)}</span><span class="name">${i.name}</span><span class="center">${i.size}</span><span class="center">${i.qty}</span><span class="right">${money(i.qty*i.price)}</span></div>`).join("")}<div class="receipt-totals"><div class="receipt-total-line"><span>Subtotal</span><b>${money(Math.round((figures.total+Number(b.discount||0))*100)/100)}</b></div><div class="receipt-total-line"><span>Discount</span><b>${money(b.discount)}</b></div><div class="receipt-total-line main"><span>TOTAL</span><span>${money(figures.total)}</span></div><div class="receipt-total-line"><span>Total Received</span><b>${money(figures.paid)}</b></div><div class="receipt-total-line balance"><span>Remaining / Kahta</span><span>${money(figures.remaining)}</span></div></div>${b.payments?.length?`<div class="receipt-rule"></div><div style="font-size:9px;font-weight:900">KAHTA COLLECTION HISTORY</div>${b.payments.map(p=>`<div style="font-size:9px">${new Date(p.date).toLocaleString()} — ${money(p.amount)}</div>`).join("")}`:""}<div class="receipt-payment">${figures.remaining>0?"KAHTA / PARTIAL PAYMENT":"PAID • PAYMENT COMPLETE"}</div>${b.returns?.length?`<div class="receipt-rule"></div><div style="font-size:9px;font-weight:900;margin-bottom:4px">RETURN HISTORY</div>${b.returns.map(r=>`<div style="font-size:8px;line-height:1.5;margin-bottom:4px">↩ ${r.date}<br>${r.items.map(x=>`Code ${x.code||itemCode(x)} • ${x.name} • Size ${x.size} • Qty ${x.qty}`).join("<br>")} • ${money(r.amount)}</div>`).join("")}`:""}<div class="receipt-footer"><div class="receipt-thanks">THANK YOU FOR SHOPPING!</div><div>Exchange according to shop policy.</div><div>Please keep this receipt for your record.</div><div class="receipt-billcode"></div><div class="receipt-code-text">${b.number}</div></div><div class="receipt-cut">✂ - - - - - - - - - - - - - - - - - - - -</div>`;
+ document.getElementById("billPreview").innerHTML=`<div class="receipt-logo"><img src="/shoe-logo.png" alt="Shoe logo" class="official-shoe-logo"></div><div class="receipt-title">${escapeHtml(window.currentShopName||"Sajid Shoes")}</div><div class="receipt-sub">QUALITY FOOTWEAR • SALES RECEIPT</div><div class="receipt-shop-contact">${escapeHtml(JSON.parse(localStorage.getItem('sajid_auth_user')||'{}').shopAddress||'')}${JSON.parse(localStorage.getItem('sajid_auth_user')||'{}').shopContact?' • '+escapeHtml(JSON.parse(localStorage.getItem('sajid_auth_user')||'{}').shopContact):''}</div><div class="receipt-rule"></div><div class="receipt-info"><div><b>Bill:</b> ${b.number}</div><div style="text-align:right"><b>Date:</b> ${dt}</div><div class="full"><b>Customer:</b> ${escapeHtml(b.customer||"Cash Customer")}</div>${b.customerAddress?`<div class="full"><b>Address:</b> ${escapeHtml(b.customerAddress)}</div>`:""}<div class="full"><b>Bill handled by:</b> ${escapeHtml(b.handledBy||"Not recorded")}</div>${b.customerPhone?`<div class="full"><b>Contact:</b> ${escapeHtml(b.customerPhone)}</div>`:""}</div><div class="receipt-rule"></div><div class="receipt-head"><span>Code</span><span>Product</span><span style="text-align:center">Size</span><span style="text-align:center">Qty</span><span style="text-align:right">Amount</span></div>${b.items.map(i=>`<div class="receipt-product"><span>${itemCode(i)}</span><span class="name">${i.name}</span><span class="center">${i.size}</span><span class="center">${i.qty}</span><span class="right">${money(i.qty*i.price)}</span></div>`).join("")}<div class="receipt-totals"><div class="receipt-total-line"><span>Subtotal</span><b>${money(Math.round((figures.total+Number(b.discount||0))*100)/100)}</b></div><div class="receipt-total-line"><span>Discount</span><b>${money(b.discount)}</b></div><div class="receipt-total-line receipt-grand-total"><span>TOTAL</span><span>${money(figures.total)}</span></div><div class="receipt-total-line"><span>Total Received</span><b>${money(figures.paid)}</b></div><div class="receipt-total-line balance"><span>Remaining / Kahta</span><span>${money(figures.remaining)}</span></div></div>${b.payments?.length?`<div class="receipt-rule"></div><div style="font-size:9px;font-weight:900">KAHTA COLLECTION HISTORY</div>${b.payments.map(p=>`<div style="font-size:9px">${new Date(p.date).toLocaleString()} — ${money(p.amount)}</div>`).join("")}`:""}<div class="receipt-payment">${figures.remaining>0?"KAHTA / PARTIAL PAYMENT":"PAID • PAYMENT COMPLETE"}</div>${b.returns?.length?`<div class="receipt-rule"></div><div style="font-size:9px;font-weight:900;margin-bottom:4px">RETURN HISTORY</div>${b.returns.map(r=>`<div style="font-size:8px;line-height:1.5;margin-bottom:4px">↩ ${r.date}<br>${r.items.map(x=>`Code ${x.code||itemCode(x)} • ${x.name} • Size ${x.size} • Qty ${x.qty}`).join("<br>")} • ${money(r.amount)}</div>`).join("")}`:""}<div class="receipt-footer"><div class="receipt-thanks">THANK YOU FOR SHOPPING!</div><div>Exchange according to shop policy.</div><div>Please keep this receipt for your record.</div><div class="receipt-billcode"></div><div class="receipt-code-text">${b.number}</div></div><div class="receipt-cut">✂ - - - - - - - - - - - - - - - - - - - -</div>`;
  document.getElementById("billModal").classList.add("show");
 }
 function addExpense(){let d=document.getElementById("expenseDesc").value.trim(),a=Number(document.getElementById("expenseAmount").value);if(!d||!a)return;expenses.unshift({id:Date.now(),desc:d,amount:a,date:new Date().toLocaleString()});document.getElementById("expenseDesc").value="";document.getElementById("expenseAmount").value="";save();renderAll()}
@@ -8567,12 +8601,7 @@ async function deletePurchase(id){
  save();renderAll();
 }
 
-function reportDateObject(value){
- if(!value)return null;
- let m=String(value).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
- if(m)return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
- let d=new Date(value);return Number.isNaN(d.getTime())?null:d;
-}
+function reportDateObject(value){return moneyDateObject(value);}
 function isInReportPeriod(dateText,period){
  let d=reportDateObject(dateText);if(!d)return false;
  let now=new Date(),start,end;
@@ -9767,7 +9796,7 @@ function fitSidebarShopName(){
  // Extra-long unbroken names stay within the circular border.
 }
 window.addEventListener('resize',fitSidebarShopName);
-window.addEventListener('DOMContentLoaded',()=>{fitSidebarShopName();new MutationObserver(fitSidebarShopName).observe(document.querySelector('.sidebar .brand-name'),{childList:true,characterData:true,subtree:true});});
+window.addEventListener('DOMContentLoaded',()=>{fitSidebarShopName();const brand=document.querySelector('.sidebar .brand-name');if(brand)new MutationObserver(fitSidebarShopName).observe(brand,{childList:true,characterData:true,subtree:true});});
 </script>
 
 <style id="kuks-compact-badge-final-2026">
@@ -11122,11 +11151,37 @@ body:has(#reports.active){overflow-y:auto!important}
 const APP_PAGES=['dashboard','sale','products','stock','purchases','customers','khata','bills','income','reports'];
 const APP_PAGE_LABELS={dashboard:'Dashboard',sale:'Sale',products:'Products',stock:'Stock',purchases:'Purchases',customers:'Customers',khata:'Kahta',bills:'Bills',income:'Income / Expenses',reports:'Reports'};
 const API_BASE=(window.SAJID_API_URL||'/api').replace(/\/$/,'');let loginRole='user',adminGateToken='',adminTempToken='',lastResetRequestId=localStorage.getItem('sajid_reset_request')||'';
-async function setLoginRole(role){if(role==='admin'){const code=await appPrompt('Admin Verification','');if(code===null)return;try{const d=await api('/auth/admin/access-code',{method:'POST',body:JSON.stringify({code:String(code).trim()})});adminGateToken=d.gateToken||''}catch(e){adminGateToken='';setAuthMsg(e.message||'Incorrect admin verification code.',true);return}}else{adminGateToken=''}loginRole=role==='admin'?'admin':'user';const u=document.getElementById('userTab'),a=document.getElementById('adminTab'),r=document.getElementById('registerBtn'),pw=document.getElementById('adminPinWrap');if(u)u.classList.toggle('active',loginRole==='user');if(a)a.classList.toggle('active',loginRole==='admin');if(r)r.style.display=loginRole==='user'?'inline-block':'none';if(pw)pw.style.display='none';adminTempToken='';const brand=document.getElementById('authShopTitle');if(brand)brand.textContent=loginRole==='admin'?'ADMIN CONTROL':'USERS ACCOUNT';setAuthMsg(loginRole==='admin'?'Admin access verified. Enter username and password.':'')}
+let adminEntryPending=false;
+async function detectAdminLogin(){
+ const input=document.getElementById('loginUsername');
+ adminTempToken='';
+ if((input?.value||'').trim().toLowerCase()!=='admin'||adminEntryPending)return;
+ adminEntryPending=true;
+ try{await setLoginRole('admin')}finally{adminEntryPending=false}
+}
+async function setLoginRole(role){
+ if(role==='admin'){
+  const code=await appPrompt('Admin Verification','');
+  if(code===null)return false;
+  try{const d=await api('/auth/admin/access-code',{method:'POST',body:JSON.stringify({code:String(code).trim()})});adminGateToken=d.gateToken||''}
+  catch(e){adminGateToken='';loginRole='user';adminTempToken='';document.getElementById('adminPinWrap').style.display='none';document.getElementById('registerBtn').style.display='inline-block';setAuthMsg(e.message||'Incorrect admin verification code.',true);return false}
+ }else adminGateToken='';
+ loginRole=role==='admin'?'admin':'user';adminTempToken='';
+ const r=document.getElementById('registerBtn'),pw=document.getElementById('adminPinWrap');
+ if(r)r.style.display=loginRole==='user'?'inline-block':'none';if(pw)pw.style.display='none';
+ const brand=document.getElementById('authShopTitle');if(brand)brand.textContent=loginRole==='admin'?'ADMIN CONTROL':'USERS ACCOUNT';
+ if(loginRole==='admin'){document.getElementById('loginUsername').value='';document.getElementById('loginPassword').value='';document.getElementById('adminPin').value='';document.getElementById('loginUsername').focus()}
+ setAuthMsg(loginRole==='admin'?'Admin access verified. Enter username and password.':'');return true;
+}
 function setAuthMsg(m,bad=false){const e=document.getElementById('authMsg');if(e){e.textContent=m||'';e.style.color=bad?'#dc2626':'#64748b'}}
-async function api(path,opt={}){const token=localStorage.getItem('sajid_auth_token'),headers={'Content-Type':'application/json',...(opt.headers||{})};if(token)headers.Authorization='Bearer '+token;const r=await fetch(API_BASE+path,{...opt,headers});let d={};try{d=await r.json()}catch{}if(!r.ok){const e=new Error(d.message||'Request failed');Object.assign(e,d);throw e}return d}
+async function api(path,opt={}){
+ const token=localStorage.getItem('sajid_auth_token'),headers={'Content-Type':'application/json',...(opt.headers||{})};if(token)headers.Authorization='Bearer '+token;
+ let r;try{r=await fetch(API_BASE+path,{...opt,headers})}catch{throw new Error('Backend connection failed. Check that your backend is running and the API address is correct.');}
+ const raw=await r.text();let d;try{d=JSON.parse(raw)}catch{const message=r.status===413?'Photo request is too large. Choose a smaller photo.':path.startsWith('/media/')?'Cloudinary endpoint is missing on this backend. Deploy the updated backend/server.js to Render, then retry.':'Backend returned a webpage instead of JSON. Check your API address and backend deployment.';throw new Error(message+' (HTTP '+r.status+')');}
+ if(!r.ok){const e=new Error(d.message||('Request failed (HTTP '+r.status+')'));Object.assign(e,d);throw e;}return d;
+}
 function openRegistration(){authModal('Create User Account',`<div class="auth-field"><label>Gmail / Email</label><input id="regEmail" class="input" type="email"></div><div class="auth-field"><label>Username</label><input id="regUsername" class="input"></div><div class="auth-field"><label>Requested Shop Name (admin approval)</label><input id="regShopName" class="input" maxlength="65" placeholder="e.g. Sajid Shoes"></div><div class="auth-field"><label>Password</label><input id="regPassword" class="input" type="password"></div><button class="auth-primary" onclick="registerUser()">Request Account</button><div id="regMsg" class="auth-msg"></div>`)} async function registerUser(){const username=regUsername.value.trim(),email=regEmail.value.trim(),password=regPassword.value;if(!email||!username||!password||!document.getElementById('regShopName').value.trim())return regMsg.textContent='Complete Email, Username, Requested Shop Name and Password.';try{const d=await api('/auth/register',{method:'POST',body:JSON.stringify({email,username,password,requestedShopName:document.getElementById("regShopName")?.value?.trim()||"Sajid Shoes"})});regMsg.textContent=d.message}catch(e){regMsg.textContent=e.message}}
-async function doLogin(){const loginEl=document.getElementById('loginUsername'),passEl=document.getElementById('loginPassword'),pinEl=document.getElementById('adminPin'),pinWrap=document.getElementById('adminPinWrap');const login=(loginEl?.value||'').trim(),password=passEl?.value||'',pin=(pinEl?.value||'').trim();const adminSelected=document.getElementById('adminTab')?.classList.contains('active');const role=adminSelected?'admin':loginRole;if(!login||!password)return setAuthMsg('Enter your email/username and password.',true);try{if(role==='admin'){loginRole='admin';if(!adminGateToken)return setAuthMsg('Click Admin and verify the admin access code first.',true);if(!adminTempToken){const d=await api('/auth/admin/login',{method:'POST',body:JSON.stringify({login,password,gateToken:adminGateToken})});adminTempToken=d.tempToken;if(pinWrap)pinWrap.style.display='block';pinEl?.focus();return setAuthMsg('Username and password verified. Enter the private 6-digit code.')}if(pin.length!==6)return setAuthMsg('Enter the complete 6-digit private code.',true);const d=await api('/auth/admin/verify-pin',{method:'POST',body:JSON.stringify({tempToken:adminTempToken,pin})});saveSession(d);await openAdmin()}else{const d=await api('/auth/login',{method:'POST',body:JSON.stringify({login,password})});saveSession(d);applyUserPages(d.user);document.getElementById('authGate').style.display='none';await loadUserState()}}catch(e){setAuthMsg(e.message||'Login failed.',true)}}
+async function doLogin(){const loginEl=document.getElementById('loginUsername'),passEl=document.getElementById('loginPassword'),pinEl=document.getElementById('adminPin'),pinWrap=document.getElementById('adminPinWrap');const login=(loginEl?.value||'').trim(),password=passEl?.value||'',pin=(pinEl?.value||'').trim();if(login.toLowerCase()==='admin'){await detectAdminLogin();return}const role=loginRole;if(!login||!password)return setAuthMsg('Enter your email/username and password.',true);try{if(role==='admin'){loginRole='admin';if(!adminGateToken)return setAuthMsg('Enter admin in the username field and verify the access code first.',true);if(!adminTempToken){const d=await api('/auth/admin/login',{method:'POST',body:JSON.stringify({login,password,gateToken:adminGateToken})});adminTempToken=d.tempToken;if(pinWrap)pinWrap.style.display='block';pinEl?.focus();return setAuthMsg('Username and password verified. Enter the private 6-digit code.')}if(pin.length!==6)return setAuthMsg('Enter the complete 6-digit private code.',true);const d=await api('/auth/admin/verify-pin',{method:'POST',body:JSON.stringify({tempToken:adminTempToken,pin})});saveSession(d);await openAdmin()}else{const d=await api('/auth/login',{method:'POST',body:JSON.stringify({login,password})});saveSession(d);applyUserPages(d.user);document.getElementById('authGate').style.display='none';await loadUserState()}}catch(e){setAuthMsg(e.message||'Login failed.',true)}}
 function saveSession(d){localStorage.setItem('sajid_auth_token',d.token);localStorage.setItem('sajid_auth_user',JSON.stringify(d.user||{}));document.body.classList.toggle('ks-user-session',d.user?.role!=='admin');document.body.classList.toggle('ks-admin-session',d.user?.role==='admin');updateUserHeader(d.user)}function updateUserHeader(user){window.currentShopName=user?.role==='user'?(user.shopName||'Sajid Shoes'):user?.role==='admin'?'Admin Control':'Sajid Shoes';window.currentShopLogo='';const brand=document.getElementById('authShopTitle');if(brand)brand.textContent=window.currentShopName.toUpperCase();document.title=window.currentShopName+' | Shop Manager';const billAddr=document.getElementById('billHeaderAddress'),billPhone=document.getElementById('billHeaderPhone');if(billAddr)billAddr.textContent=user?.shopAddress||'';if(billPhone)billPhone.textContent=user?.shopContact||'';document.querySelectorAll('[data-shop-name]').forEach(el=>el.textContent=window.currentShopName);const sidebarName=document.querySelector('.sidebar .brand-name');if(sidebarName){sidebarName.style.removeProperty('font-size');requestAnimationFrame(fitSidebarShopName);}const a=document.getElementById('userHeaderActions'),n=document.getElementById('loggedInUserName');if(!a)return;if(user&&user.role!=='admin'){a.style.display='flex';if(n)n.textContent=user.username||user.name||user.email||'User';if(!document.getElementById('contactRequestBtn')){const btn=document.createElement('button');btn.id='contactRequestBtn';btn.type='button';btn.className='shop-contact-request-btn';btn.title='Request a change to your shop contact';btn.textContent='⋯ Edit address / contact';btn.onclick=requestShopContactChange;a.appendChild(btn)}}else{a.style.display='none';if(n)n.textContent=''}}async function logoutApp(){document.body.classList.remove('ks-user-session','ks-admin-session');updateUserHeader(null);
  if(accountLoaded){try{await retryPendingAccountSave()}catch(e){appAlert("Logout paused: "+e.message+" Your unsaved changes remain in this browser.");return}}
  accountLoaded=false;
@@ -11616,4 +11671,566 @@ async function permanentlyClearReport(){if(!await appConfirm('This clears report
   .products, .pos-products { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .page .card:has(table), .table-wrap, .table-responsive { overflow-x: auto !important; }
 }
+</style>
+
+<!-- Complete updated design and handler history, included in this file. -->
+<style id="shoes-updated-design">
+#reports .hh-panel{--hh-navy:#112e54;--hh-muted:#596e91;box-sizing:border-box;min-width:0;margin:0 0 24px;padding:24px;border:1px solid #dfe9f7;border-radius:20px;background:linear-gradient(145deg,#fff,#fbfdff);color:var(--hh-navy);box-shadow:0 5px 24px #14376a08;font-family:Inter,Segoe UI,Arial,sans-serif}
+.hh-panel *{box-sizing:border-box}.hh-panel [hidden]{display:none!important}.hh-panel svg{width:24px;height:24px;flex-shrink:0}.hh-header{display:flex;align-items:center;gap:18px;margin-bottom:24px}.hh-heading-icon{width:64px;height:64px;border-radius:16px;background:#e9f4ff;color:#1263bd;display:grid;place-items:center;flex-shrink:0}.hh-heading-icon svg{width:32px;height:32px}.hh-title{flex:1;min-width:0}.hh-panel .hh-title h2{font-size:clamp(21px,2.2vw,30px);line-height:1.2;font-weight:800;margin:0 0 6px;letter-spacing:-.5px;color:#102d52}.hh-panel .hh-title p{margin:0;color:var(--hh-muted);font-size:14px;line-height:1.5}.hh-toggle{display:flex;align-items:center;gap:10px;flex-shrink:0;padding:14px 18px;border:0;border-radius:12px;color:#fff;background:linear-gradient(#15375f,#0e2649);box-shadow:0 3px 9px #142d5212;font:600 14px Segoe UI,Arial,sans-serif;cursor:pointer}.hh-toggle svg{width:18px;height:18px;transition:transform .18s}.hh-toggle[aria-expanded=true] svg{transform:rotate(180deg)}.hh-toggle:hover{background:#204670}.hh-toggle:focus-visible,.hh-panel input:focus-visible,.hh-panel select:focus-visible{outline:3px solid #90bff5;outline-offset:2px}.hh-filters{display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr;gap:18px;padding:18px 20px;border:1px solid #e0eaf8;border-radius:14px;background:#f7faff;margin-bottom:20px}.hh-filters label{display:flex;flex-direction:column;gap:8px;min-width:0;font-size:13px;font-weight:650;color:#52658a}.hh-panel .hh-filters input,.hh-panel .hh-filters select{display:block;width:100%!important;min-width:0;height:46px;padding:0 12px;border:1px solid #d8e3f3;border-radius:10px;background:#fff;color:#152b4f;font:400 14px Segoe UI,Arial,sans-serif;box-shadow:none;margin:0}.hh-search{position:relative;display:block}.hh-search svg{position:absolute;left:12px;top:13px;width:20px;height:20px;color:#677c9f}.hh-panel .hh-search input{padding-left:40px}.hh-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:22px}.hh-stat{display:flex;gap:16px;align-items:center;padding:20px 18px;border:1px solid #e0e9f7;border-radius:14px;background:#fff;min-width:0;box-shadow:0 5px 15px #173d7310}.hh-stat>div{min-width:0}.hh-stat-icon{display:grid;place-items:center;width:56px;height:56px;border-radius:14px;flex-shrink:0;background:#e8f4ff;color:#0d60b4}.hh-stat-icon svg{width:30px;height:30px}.hh-stat-label{display:block;font-size:13px;font-weight:600;color:#53698e;margin-bottom:7px}.hh-stat strong{display:block;font-size:clamp(21px,2vw,29px);line-height:1.2;font-weight:800;color:#102649;overflow-wrap:anywhere}.hh-purple .hh-stat-icon{background:#eee8ff;color:#6735d5}.hh-green .hh-stat-icon{background:#e5f7ec;color:#158044}.hh-green strong{color:#13793c}.hh-amber .hh-stat-icon{background:#fff4da;color:#b16b05}.hh-amber strong{color:#a75c00}.hh-table-card{border:1px solid #dfe9f7;border-radius:13px;overflow:hidden;background:#fff;margin-bottom:18px}.hh-panel .hh-table-card h3{display:flex;align-items:center;gap:12px;margin:0;padding:15px 20px;background:#f4f8fd;color:#112d55;font-size:18px;font-weight:750;border-bottom:1px solid #e1eaf6}.hh-table-card h3 svg{color:#145fb4;width:23px;height:23px}.hh-table-scroll{max-width:100%;overflow-x:auto}.hh-panel table{width:100%;border-collapse:collapse;margin:0;table-layout:auto}.hh-panel th{background:#f0f5fc;color:#53698e;font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.4px;padding:13px 20px;text-align:left;border:0;border-bottom:1px solid #e1eaf6;white-space:nowrap}.hh-panel td{font-size:13px;color:#1b3154;padding:16px 20px;text-align:left;vertical-align:middle;border:0;border-bottom:1px solid #edf2f9;white-space:nowrap}.hh-panel tbody tr:last-child td{border-bottom:0}.hh-panel tbody tr:hover{background:#fbfdff}.hh-panel td small{display:block;color:#62779b;font-size:12px;margin-top:5px}.hh-badge{display:inline-block;padding:7px 12px;border-radius:9px;font-weight:700}.hh-pending{background:#fff0ca;color:#a05b00}.hh-paid{background:#e7f7ec;color:#167c41}.hh-status{font-size:12px;margin-left:12px}.hh-pending-text{color:#b66c07}.hh-paid-text{color:#178149}.hh-panel .hh-footnote{display:flex;align-items:flex-start;gap:9px;margin:0;padding:0 4px;color:#64799c;font-size:12px;line-height:1.6}.hh-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:1100px){.hh-filters,.hh-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.hh-panel td,.hh-panel th{padding:13px 15px}.hh-stat strong{font-size:25px}}
+@media(max-width:600px){#reports .hh-panel{padding:15px;border-radius:15px}.hh-header{gap:10px;flex-wrap:wrap;margin-bottom:16px}.hh-heading-icon{width:44px;height:44px;border-radius:12px}.hh-heading-icon svg{width:26px;height:26px}.hh-title{flex-basis:calc(100% - 55px)}.hh-panel .hh-title h2{font-size:20px}.hh-panel .hh-title p{font-size:12px}.hh-toggle{margin-left:auto;padding:10px 13px;font-size:12px}.hh-filters{padding:13px;gap:12px}.hh-stats{gap:10px}.hh-stat{padding:14px 11px;gap:10px;align-items:flex-start;flex-direction:column}.hh-stat-icon{width:36px;height:36px;border-radius:9px}.hh-stat-icon svg{width:22px;height:22px}.hh-stat-label{font-size:12px}.hh-stat strong{font-size:22px}.hh-panel .hh-table-card h3{font-size:16px;padding:13px 14px}.hh-panel .hh-footnote{font-size:11px}.hh-table-scroll table{min-width:570px}}
+@media(prefers-reduced-motion:reduce){.hh-toggle svg{transition:none}}
+
+/* Shared visual theme only. Application logic and print styles are preserved. */
+@media screen{
+html body{--pro-navy:#12335b;--pro-ink:#173357;--pro-muted:#607696;--pro-line:#e0eafa;--pro-canvas:#f4f8ff;--pro-blue:#176bc0;--pro-shadow:0 5px 20px #153b6d08;background:var(--pro-canvas)!important;color:var(--pro-ink)!important;font-family:Inter,'Segoe UI',Arial,sans-serif!important;overflow-x:clip}
+html body :is(button,input,select,textarea,h1,h2,h3,h4,p,label,span,td,th,strong,small){font-family:Inter,'Segoe UI',Arial,sans-serif!important}
+html body .app,html body .main,html body .content,html body .page{min-width:0!important}
+html body .header{height:76px!important;background:#ffffffed!important;backdrop-filter:blur(14px);border-bottom:1px solid var(--pro-line)!important;padding:0 28px!important;box-shadow:0 2px 14px #153b6d04!important}
+html body .header h2{font-size:22px!important;font-weight:750!important;color:var(--pro-navy)!important;letter-spacing:-.4px}
+html body .content{padding:26px!important;background:transparent!important}
+html body .page-title{margin-bottom:22px!important;color:var(--pro-navy)!important}
+html body .page-title h1{font-size:28px!important;font-weight:800!important;letter-spacing:-.6px;color:var(--pro-navy)!important}
+html body .page-title p,html body :is(.purchase-help,.money-entry-head p,.combined-history-head small){color:var(--pro-muted)!important;font-size:13px!important;line-height:1.6!important}
+html body :is(.card,.stat,.customer-card,.product,.pos-item,.stock-item,.stock-card,.money-one-sheet,.report-new-shell,.admin-section,.admin-user-card,.admin-backup-row,.recovery-record){background:#fff!important;border:1px solid var(--pro-line)!important;border-radius:16px!important;box-shadow:var(--pro-shadow)!important;color:var(--pro-ink)!important}
+html body .card{padding:22px!important}
+html body :is(.card h2,.card h3,.purchase-box h3,.combined-history-head h3,.money-entry-head h2,.admin-section-title h2){color:var(--pro-navy)!important;font-weight:750!important;letter-spacing:-.3px;line-height:1.35!important}
+html body .card>h3{padding-bottom:13px;margin-bottom:16px!important;border-bottom:1px solid #edf2fa}
+html body :is(.input,.auth-field input,.pos-item select,.stock-input,.stock-row input,.admin-section-picker-label select,.recovery-fields input){min-height:46px!important;padding:11px 14px!important;border:1px solid #d9e4f6!important;border-radius:11px!important;background:#fff!important;color:var(--pro-ink)!important;font-size:14px!important;box-shadow:none!important}
+html body textarea.input{min-height:150px!important;line-height:1.6!important;resize:vertical}
+html body :is(input,textarea)::placeholder{color:#8a9ab2!important;font-weight:400!important}
+html body :is(input,select,textarea):focus{border-color:#72b2e8!important;outline:3px solid #e0f1ff!important;outline-offset:1px!important}
+html body label{font-size:13px!important;font-weight:650!important;color:#536b91!important;margin-bottom:8px!important}
+html body .form-group{margin-bottom:17px!important}
+html body :is(.btn,.auth-primary,.app-modal-save,.pro-dialog-ok,.pro-dialog-confirm,.sale-jump-btn){border:1px solid transparent!important;border-radius:11px!important;background:linear-gradient(160deg,#1b426d,#102d53)!important;color:#fff!important;padding:12px 17px!important;font-size:13px!important;font-weight:650!important;line-height:1.35!important;box-shadow:0 3px 8px #13365f0c!important;cursor:pointer}
+html body .btn.orange{background:#1764b5!important;color:#fff!important}
+html body .btn.green{background:#187f50!important;color:#fff!important}
+html body .btn.red{background:#fff2f2!important;color:#b33644!important;border-color:#f3cfd3!important}
+html body button:hover{filter:brightness(.97)}
+html body button:focus-visible{outline:3px solid #80b8f0!important;outline-offset:3px!important}
+html body button:disabled{opacity:.55;cursor:not-allowed}
+html body :is(.toolbar,.customer-top-tools,.combined-filter-controls){gap:12px!important;align-items:center!important;flex-wrap:wrap!important}
+html body .toolbar{padding:17px!important;border:1px solid var(--pro-line)!important;border-radius:14px!important;background:#f9fbff!important;margin-bottom:22px!important}
+html body :is(.stats,.products,.pos-products){gap:18px!important}
+html body .stat{padding:22px!important;position:relative;min-width:0!important;min-height:145px!important}
+html body .stat .icon{display:grid!important;place-items:center;width:48px;height:48px;font-size:24px!important;border-radius:13px!important;background:#eaf4ff!important;margin:0 0 13px!important}
+html body .stat:nth-child(4n+2) .icon{background:#eee9ff!important}
+html body .stat:nth-child(4n+3) .icon{background:#e8f7ee!important}
+html body .stat:nth-child(4n+4) .icon{background:#fff4df!important}
+html body .stat p{font-size:13px!important;font-weight:600!important;color:#5d7295!important;margin:0 0 9px!important}
+html body .stat h2{font-size:26px!important;font-weight:800!important;color:var(--pro-navy)!important;line-height:1.2!important;overflow-wrap:anywhere}
+html body #todayProfit{color:#147b43!important}html body #khataTotal{color:#a56708!important}
+html body :is(.badge,.return-badge){border-radius:8px!important;padding:6px 10px!important;font-weight:650!important}
+html body .badge.paid{background:#e9f7ee!important;color:#1a7b48!important}
+html body .badge.credit{background:#fff3dc!important;color:#a56308!important}
+html body .page table{width:100%!important;border-collapse:collapse!important;background:#fff!important}
+html body .page th{background:#f4f8fe!important;color:#607392!important;text-transform:uppercase;font-size:11px!important;letter-spacing:.35px;font-weight:750!important;padding:15px 17px!important;border-bottom:1px solid var(--pro-line)!important;text-align:left}
+html body .page td{padding:16px 17px!important;color:#263e60!important;font-size:13px!important;border-bottom:1px solid #edf2fa!important;line-height:1.5!important}
+html body .page tbody tr:hover{background:#fbfdff!important}
+html body .page tbody tr:last-child td{border-bottom:0!important}
+html body .customer-card{padding:19px 21px!important;margin-bottom:13px!important;gap:15px!important}
+html body .customer-main-info strong{font-size:16px!important;color:var(--pro-navy)!important}
+html body .customer-phone{margin-top:6px!important;color:var(--pro-muted)!important;font-size:12px!important}
+html body .customer-balance{font-weight:650!important;font-size:13px!important}
+html body .balance-red{color:#a5680c!important}
+html body .product{transition:box-shadow .15s,border-color .15s;overflow:hidden!important}
+html body .product:hover{box-shadow:0 8px 26px #143c7110!important;border-color:#c7dbf3!important}
+html body .product-image{background:#f7faff!important;height:210px!important;padding:13px!important}
+html body .product-image img{object-fit:contain!important}
+html body .product-body{padding:18px!important}
+html body .product-body h3{font-size:17px!important;line-height:1.35!important;font-weight:750!important;color:var(--pro-navy)!important}
+html body .product-body small{font-size:11px!important;font-weight:650!important;letter-spacing:.4px;color:#7487a3!important}
+html body .price{color:#153e70!important;font-size:20px!important;font-weight:750!important}
+html body .stock{color:var(--pro-muted)!important;font-size:12px!important}
+html body .pos-item{padding:16px!important}
+html body .pos-item .shoe{height:175px!important;border-radius:12px!important;background:#f7faff!important;padding:10px!important}
+html body .pos-item .shoe img{object-fit:contain!important}
+html body .pos-item h4{color:var(--pro-navy)!important;font-size:16px!important;line-height:1.35!important}
+html body .pos-item small{font-size:11px!important;color:var(--pro-muted)!important}
+html body .cart{border-top:3px solid #2f6da9!important}
+html body .bill-brand{background:#f5f9ff!important;border:1px solid var(--pro-line)!important;border-radius:13px!important;padding:16px!important}
+html body .bill-brand-name{color:#15395f!important;letter-spacing:.3px;font-size:19px!important}
+html body .bill-brand-sub{color:#6a7e9c!important;font-size:11px!important}
+html body :is(.bill-approved-item,.cart-product-row){border:1px solid var(--pro-line)!important;background:#fbfdff!important;border-radius:11px!important}
+html body .cart-product-row{padding:12px!important;margin-bottom:10px!important}
+html body .cart-product-image{border-radius:10px!important;background:#f4f8fd!important;border:1px solid var(--pro-line)!important}
+html body .cart-product-name{color:#18385c!important;font-weight:700!important}
+html body .cart-product-meta{color:#7486a0!important;font-size:12px!important}
+html body .cart-remove{background:#fff2f2!important;color:#af4552!important;border:1px solid #f4dce0!important;border-radius:7px!important;padding:5px 9px!important}
+html body .total-row{padding:13px 0!important;border-bottom:1px solid #edf2fa!important;font-size:14px!important}
+html body .total-row.grand{background:#f1f7ff!important;border-radius:11px!important;color:#13395f!important;padding:16px!important;font-size:20px!important;margin:14px 0!important}
+html body .purchase-grid,html body .money-entry-grid{gap:16px!important}
+html body :is(.purchase-example,.purchase-bulk){background:#f7faff!important;border:1px solid var(--pro-line)!important;border-radius:11px!important}
+html body .purchase-example{padding:13px!important;color:#5c7293!important;font-size:12px!important}
+html body .purchase-history{margin-top:20px!important}
+html body .money-one-sheet{padding:25px!important}
+html body .money-entry-head,html body .combined-history-head{padding-bottom:18px!important;border-bottom:1px solid #edf2fa!important;gap:16px!important}
+html body .money-type-switch{padding:5px!important;background:#f1f6fe!important;border:1px solid var(--pro-line)!important;border-radius:12px!important;gap:4px!important}
+html body .money-type-switch button{border:0!important;border-radius:8px!important;padding:10px 16px!important;background:transparent!important;color:#627796!important;font-size:13px!important;font-weight:650!important}
+html body .money-type-switch button.active{background:#fff!important;color:#174671!important;box-shadow:0 2px 7px #20477312!important}
+html body .money-divider{background:#e7eef9!important;margin:25px 0!important;height:1px!important}
+html body :is(.report-new-shell,.report-new-card){background:#fff!important;border:1px solid var(--pro-line)!important;border-radius:16px!important;box-shadow:var(--pro-shadow)!important}
+html body .report-new-shell{padding:24px!important}
+html body .report-new-top{padding:17px!important;background:#f7faff!important;border:1px solid var(--pro-line)!important;border-radius:13px!important;gap:14px!important}
+html body .report-new-search input{border:1px solid #d9e4f6!important;background:#fff!important;border-radius:10px!important;padding:12px!important;color:var(--pro-ink)!important}
+html body :is(.report-new-search button,.report-ref-trigger,.money-ref-trigger,.report-new-clear){background:#14365e!important;color:#fff!important;border-radius:10px!important;border:0!important;font-weight:650!important}
+html body :is(.report-ref-menu,.money-ref-menu){background:#fff!important;border:1px solid var(--pro-line)!important;border-radius:12px!important;box-shadow:0 12px 35px #163d7520!important}
+html body :is(.report-ref-option,.money-ref-option){color:#1c3d63!important;border-radius:8px!important;font-size:13px!important}
+html body :is(.report-ref-option.active,.money-ref-option.active){background:#edf5ff!important;color:#145fa9!important}
+html body .report-new-card{padding:22px!important;color:var(--pro-navy)!important}
+html body .report-new-card strong{font-size:27px!important;font-weight:800!important;color:var(--pro-navy)!important}
+html body .report-permanent-clear{background:#fff2f2!important;color:#b33644!important;border:1px solid #f3d1d7!important;border-radius:10px!important}
+html body .professional-recovery{background:#fff!important;border:1px solid var(--pro-line)!important}
+html body .recovery-folder{background:#e9f4ff!important;color:#2465a6!important;border-radius:13px!important}
+html body .recovery-heading h2{font-size:21px!important}
+html body .recovery-heading p{color:var(--pro-muted)!important;line-height:1.6!important}
+html body .recovery-dropzone{background:#f8fbff!important;border:1.5px dashed #bdd3ec!important;border-radius:13px!important;padding:20px!important}
+html body :is(.recovery-choose,.shop-contact-request-btn){background:#175da7!important;color:#fff!important;border-radius:10px!important;border:0!important}
+html body .auth-gate{background:radial-gradient(ellipse at 15% 0%,#dceeff,transparent 50%),radial-gradient(ellipse at 90% 90%,#eaeaff,transparent 50%),#f5f8fe!important}
+html body .auth-card{border:1px solid #dce7f6!important;border-radius:22px!important;background:#fff!important;padding:30px!important;box-shadow:0 20px 70px #123e7210!important}
+html body .auth-brand h2{color:#15375e!important;font-size:24px!important;font-weight:800!important;letter-spacing:-.5px}
+html body .auth-brand p{color:var(--pro-muted)!important;font-size:13px!important}
+html body .auth-brand .shoe{background:#f1f7ff!important;border:1px solid var(--pro-line)!important;border-radius:18px!important}
+html body .auth-tabs{background:#f1f6fe!important;border:1px solid var(--pro-line)!important;border-radius:12px!important;padding:5px!important}
+html body .auth-tabs button{border-radius:8px!important;color:#67809e!important;font-weight:650!important}
+html body .auth-tabs button.active{background:#fff!important;color:#173c69!important;box-shadow:0 3px 10px #1546750e!important}
+html body .auth-primary{width:100%!important;padding:14px!important}
+html body .auth-link{color:#2868a6!important;font-size:12px!important;font-weight:600!important}
+html body .admin-panel{background:#f4f8ff!important}
+html body .admin-shell{max-width:1350px!important;padding:28px!important}
+html body .admin-top{background:#fff!important;border:1px solid var(--pro-line)!important;border-radius:17px!important;padding:25px!important;margin-bottom:23px!important;box-shadow:var(--pro-shadow)!important}
+html body .admin-top h1{color:var(--pro-navy)!important;font-size:27px!important;letter-spacing:-.5px}
+html body .admin-top p{color:var(--pro-muted)!important;font-size:13px!important;line-height:1.6}
+html body .admin-section{padding:24px!important;margin-bottom:20px!important}
+html body .admin-section-title{border-bottom:1px solid #edf2fa!important;padding-bottom:15px!important;margin-bottom:18px!important;gap:12px!important}
+html body .admin-section-title span{color:var(--pro-muted)!important;font-size:12px!important}
+html body .admin-user-card{padding:20px!important;margin-bottom:15px!important}
+html body .admin-user-head{padding-bottom:16px!important;border-bottom:1px solid #edf2fa!important;gap:15px!important}
+html body .admin-user-head b{font-size:17px!important;color:var(--pro-navy)!important}
+html body .admin-page-row{background:#f9fbff!important;border:1px solid var(--pro-line)!important;border-radius:10px!important;padding:11px!important}
+html body :is(.mini-on,.mini-off){border-radius:7px!important;font-size:11px!important}
+html body .mini-on.active{background:#e7f6eb!important;color:#167e49!important}
+html body .mini-off.active{background:#fff0f0!important;color:#b84651!important}
+html body .admin-backups{background:#f8fbff!important;border-radius:13px!important;padding:16px!important;margin-top:16px!important}
+html body :is(.modal-box,.app-modal,.pro-dialog,.pro-dialog-box,.pro-dialog-panel){background:#fff!important;border:1px solid #deE8f6!important;border-radius:18px!important;box-shadow:0 20px 70px #13335720!important;color:var(--pro-ink)!important}
+html body .modal-head{border-bottom:1px solid #e8eff9!important;padding-bottom:15px!important;margin-bottom:20px!important}
+html body .modal-head h2{color:var(--pro-navy)!important;font-size:21px!important}
+html body .close{border-radius:10px!important;background:#f1f6fd!important;color:#607998!important;width:35px!important;height:35px!important}
+html body :is(.app-modal-field input,.pro-dialog-input){min-height:46px!important;border:1px solid #d9e4f6!important;border-radius:10px!important;color:var(--pro-ink)!important}
+html body :is(.app-modal-cancel,.pro-dialog-cancel){background:#f2f6fd!important;color:#536c8c!important;border:1px solid var(--pro-line)!important;border-radius:10px!important;padding:11px 16px!important}
+html body #handlerPanel{box-shadow:var(--pro-shadow)!important}
+html body .hh-stat{padding:20px 16px!important;gap:14px!important}
+html body .hh-stat strong{font-size:clamp(21px,1.9vw,29px)!important}
+}
+@media screen and (min-width:761px){
+html body .sidebar{width:235px!important;background:#fff!important;color:#1d3b5f!important;border-right:1px solid #dfe9f7!important;padding:20px 14px!important;box-shadow:none!important}
+html body .sidebar .brand-circle{background:#f5f9ff!important;border:1px solid #e1ebf8!important;box-shadow:none!important;border-radius:18px!important;width:190px!important;height:160px!important;min-width:0!important;min-height:0!important}
+html body .sidebar .brand-icon{width:80px!important;height:80px!important;min-width:0!important;min-height:0!important;border:0!important;background:transparent!important;border-radius:0!important}
+html body .sidebar .brand-icon img{border-radius:0!important;object-fit:contain!important}
+html body .sidebar .brand-name{color:#15395f!important;font-size:15px!important;max-width:160px!important}
+html body .sidebar .menu button{color:#657995!important;background:transparent!important;border:1px solid transparent!important;padding:12px 14px!important;font-size:13px!important;font-weight:600!important;border-radius:10px!important;margin:3px 0!important;box-shadow:none!important}
+html body .sidebar .menu button.active{background:#ebf4ff!important;border-color:#dceafb!important;color:#185e9e!important;font-weight:750!important}
+html body .sidebar .menu button:hover{background:#f5f9fe!important}
+html body .sidebar #sidebarLogoutBtn{color:#ad4351!important;background:#fff5f5!important;border-color:#f4dce0!important}
+html body .main{margin-left:235px!important;width:calc(100% - 235px)!important}
+html body .stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+html body .products{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+html body .pos-products{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media screen and (min-width:761px) and (max-width:1100px){
+html body .sidebar{width:205px!important}html body .main{margin-left:205px!important;width:calc(100% - 205px)!important}
+html body .sidebar .brand-circle{width:175px!important}
+html body .stats,html body .products{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html body .pos{grid-template-columns:minmax(0,1fr)!important}html body .pos-products{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html body .header{padding:0 20px!important}html body .content{padding:20px!important}
+}
+@media screen and (max-width:760px){
+html body .header{height:auto!important;min-height:66px!important;padding:15px 16px!important;gap:12px!important;flex-wrap:wrap!important}
+html body .header h2{font-size:20px!important}html body .content{padding:16px!important}
+html body .main{margin-left:0!important;width:100%!important}
+html body .card,html body .money-one-sheet,html body .report-new-shell{padding:17px!important}
+html body .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+html body .stat{padding:17px!important;min-height:142px!important}html body .stat h2{font-size:24px!important}
+html body .products,html body .pos-products{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+html body .product-image{height:175px!important;padding:10px!important}html body .product-body{padding:13px!important}html body .product-body h3{font-size:15px!important}
+html body .pos-item{padding:12px!important}html body .pos-item .shoe{height:145px!important}
+html body .pos,html body .grid-2,html body .purchase-layout{grid-template-columns:minmax(0,1fr)!important;gap:17px!important}
+html body .toolbar .input{max-width:none!important;flex:1 1 180px!important}
+html body .customer-card{padding:17px!important;flex-wrap:wrap!important}html body .customer-actions{flex-wrap:wrap!important;gap:9px!important}
+html body .customer-bill-contact,html body .purchase-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html body .recovery-dropzone{padding:14px!important;flex-wrap:wrap!important;gap:12px!important}
+html body .recovery-action-buttons{gap:11px!important}html body .recovery-action-buttons .btn{min-height:65px!important;font-size:12px!important;padding:12px 9px!important}
+html body .money-entry-head,html body .combined-history-head{flex-wrap:wrap!important;gap:14px!important}
+html body .money-entry-grid{grid-template-columns:minmax(0,1fr)!important}
+html body .admin-shell{padding:15px!important}html body .admin-top,html body .admin-section{padding:18px!important}
+html body .admin-top{flex-wrap:wrap!important;gap:15px!important}html body .admin-top h1{font-size:23px!important}
+html body .admin-user-head{flex-wrap:wrap!important}.admin-user-head>div{min-width:0;max-width:100%;overflow-wrap:anywhere}
+html body .auth-card{padding:24px!important;max-width:calc(100vw - 30px)!important}
+html body .page .card:has(table),html body .table-wrap,html body .table-responsive{overflow-x:auto!important}
+html body .page th,html body .page td{padding:13px!important;white-space:nowrap}
+html body .hh-filters input,html body .hh-filters select{min-width:0!important}
+html body .hh-stat strong{font-size:22px!important}
+/* Keep the existing mobile navigation position and interaction. */
+html body .sidebar{background:#fff!important;border-color:#dce7f7!important;box-shadow:0 -4px 20px #153b6d09!important}
+html body .sidebar .menu button{background:#f6f9ff!important;color:#567294!important;border:1px solid #e4edfa!important;border-radius:10px!important;font-size:12px!important;font-weight:600!important}
+html body .sidebar .menu button.active{background:#153a64!important;color:#fff!important;border-color:#153a64!important}
+html body .sidebar .brand-name{color:#15395f!important}
+}
+@media screen and (max-width:380px){html body .content{padding:12px!important}html body .product-image{height:145px!important}html body .pos-item .shoe{height:125px!important}html body .stat h2{font-size:21px!important}html body .btn{padding:10px 12px!important}}
+@media screen and (prefers-reduced-motion:reduce){html body *{scroll-behavior:auto!important;transition:none!important}}
+@media screen{
+html body #reports .report-new-shell{background:#fff!important;border:1px solid #e0eafa!important;border-radius:16px!important;padding:24px!important;box-shadow:0 5px 20px #153b6d08!important;margin-bottom:24px!important}
+html body #reports .report-new-top{background:#f7faff!important;border:1px solid #e0eafa!important;border-radius:13px!important;padding:17px!important}
+html body #reports .report-new-grid{gap:16px!important}
+html body #reports .report-new-card{background:#fff!important;border:1px solid #e0eafa!important;border-radius:14px!important;padding:24px!important;min-height:125px!important;box-shadow:0 5px 20px #153b6d08!important}
+html body #reports .report-new-card span{font-size:13px!important;font-weight:600!important;color:#607696!important;margin-bottom:12px!important}
+html body #reports .report-new-card strong{font-size:27px!important;font-weight:800!important;color:#15395f!important;line-height:1.25!important;overflow-wrap:anywhere}
+html body #reports .report-new-card.profit strong,html body #reports .report-new-card.income strong{color:#167c48!important}
+html body #reports .report-new-card.khata strong{color:#a56708!important}
+html body #reports #handlerPanel{margin-top:24px!important;margin-bottom:0!important}
+html body #dashboard .stat{background:#fff!important;border:1px solid #e0eafa!important;border-radius:16px!important;box-shadow:0 5px 20px #153b6d08!important}
+html body #income .money-one-sheet{background:#fff!important;border:1px solid #e0eafa!important;border-radius:16px!important;box-shadow:0 5px 20px #153b6d08!important}
+html body #income .combined-history-head,html body #income .money-entry-head{background:transparent!important;color:#15395f!important}
+html body #income .combined-history-head h3,html body #income .money-entry-head h2{color:#15395f!important;font-size:21px!important;font-weight:750!important}
+html body #stock .stock-card,html body #stock .stock-product-card{border:1px solid #e0eafa!important;border-radius:15px!important;background:#fff!important;box-shadow:0 5px 20px #153b6d08!important}
+}
+@media screen and (max-width:760px){
+html body #reports .report-new-shell{padding:17px!important}
+html body #reports .report-new-card{min-height:116px!important;padding:18px!important}
+html body #reports .report-new-card span{font-size:12px!important}html body #reports .report-new-card strong{font-size:23px!important}
+}
+
+@media screen{
+html body.picture-design{background:#edf6ff!important;color:#102c50!important}
+.picture-design .screen-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:22px;min-width:0}
+.picture-design .screen-heading h1{font-size:26px!important;line-height:1.2;font-weight:800!important;letter-spacing:-.6px;color:#102e54!important;margin:0 0 6px!important}
+.picture-design .screen-heading p{font-size:13px!important;line-height:1.5;color:#647b9d!important;margin:0!important}
+.picture-design .screen-date{background:#fff;padding:10px 13px;border:1px solid #dce8f8;border-radius:9px;font-size:12px;white-space:nowrap;color:#476789}
+html body.picture-design .page>.page-title{display:none!important}
+html body.picture-design .header{background:#fafdff!important;border-bottom:1px solid #d5e7f8!important;height:66px!important}
+html body.picture-design .header #headerTitle{font-size:17px!important;font-weight:600!important;color:#617a9c!important}
+html body.picture-design .content{padding:25px 26px!important;background:#edf6ff!important}
+html body.picture-design :is(.card,.stat,.product,.pos-item,.customer-card){border-color:#dbe9fa!important;border-radius:13px!important;box-shadow:0 4px 15px #163f7207!important}
+html body.picture-design .btn.orange,html body.picture-design .btn:not(.red):not(.green),html body.picture-design .auth-primary{background:#0867f1!important;color:white!important;border:1px solid #0867f1!important}
+html body.picture-design .btn.green{background:#05964b!important;border-color:#05964b!important}
+html body.picture-design .btn.red{color:#d6424e!important;background:#fff1f3!important;border:1px solid #ffd4da!important}
+html body.picture-design .sidebar .menu button{display:flex!important;align-items:center!important;gap:12px!important}
+.picture-design .sidebar .menu button svg{width:19px;height:19px;flex-shrink:0}
+html body.picture-design .sidebar .menu button.active{background:#0766ed!important;border-color:#0766ed!important;color:#fff!important;box-shadow:0 4px 15px #00387b15!important}
+html body.picture-design #sidebarLogoutBtn{margin-top:20px!important}
+html body.picture-design .sidebar .menu button span{font-size:13px!important;font-weight:500!important}
+.picture-design #dashboard .professional-recovery{margin-top:22px!important;margin-bottom:0!important}
+html body.picture-design #dashboard .stat{min-height:136px!important;padding:19px!important}
+.picture-design .stat .icon svg{width:25px;height:25px;stroke:#076bd0}
+html body.picture-design #dashboard .stat .icon{width:42px;height:42px;background:#edf7ff!important;margin-bottom:10px!important}
+html body.picture-design #dashboard .stat h2{font-size:25px!important;color:#113460!important}
+html body.picture-design #dashboard #todaySales,html body.picture-design #dashboard #todayProfit{color:#138144!important}
+html body.picture-design #dashboard .grid-2{grid-template-columns:1.5fr 1fr!important}
+html body.picture-design .pos{grid-template-columns:minmax(0,1.7fr) minmax(315px,1fr)!important;align-items:start!important}
+html body.picture-design .cart{position:static!important;padding:20px!important;border-top:1px solid #dbe9fa!important}
+html body.picture-design .pos-item .shoe{height:180px!important;background:#fff!important}
+html body.picture-design .product-image{height:205px!important;background:#fff!important}
+html body.picture-design .pos-item h4,html body.picture-design .product-body h3{font-size:15px!important;line-height:1.45!important}
+html body.picture-design .price{color:#102e54!important;font-weight:800!important}
+html body.picture-design #customerList{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px!important}
+html body.picture-design #customerList .customer-card{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:16px!important;padding:20px!important;margin:0!important;min-width:0!important}
+.picture-design #customerList .customer-main-info{display:grid;grid-template-columns:46px minmax(0,1fr);gap:5px 12px;align-items:center}
+.picture-design .customer-avatar{grid-row:1/3;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:#dcecff;color:#3167a7;font-weight:700;font-size:15px}
+.picture-design .avatar-1{background:#eee1ff;color:#7c48b5}.picture-design .avatar-2{background:#dbf2e8;color:#277454}
+.picture-design #customerList .customer-main-info strong{overflow-wrap:anywhere}
+.picture-design #customerList .customer-phone{margin:0!important;font-size:12px!important}
+html body.picture-design #customerList .customer-balance{background:#f0f7ff!important;padding:16px!important;border-radius:10px!important;font-size:13px!important;color:#6580a1!important}
+.picture-design #customerList .customer-balance span{display:block;font-size:22px!important;margin-top:6px;color:#198044;font-weight:800}
+html body.picture-design #customerList .customer-actions{display:flex!important;flex-wrap:wrap!important;gap:9px!important;justify-content:stretch!important}
+.picture-design #customerList .customer-actions button{flex:1!important;background:#edf6ff!important;color:#0966c7!important;border:1px solid #cee2ff!important}
+html body.picture-design #customerList .customer-actions button.red{background:#fff1f3!important;color:#d6424e!important;border-color:#ffd4da!important}
+.picture-design .kahta-design-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:20px}
+.picture-design .kahta-design-stat{display:flex;align-items:center;gap:17px;border:1px solid #dbe9fa;border-radius:13px;background:white;padding:24px}
+.picture-design .kahta-design-stat svg{width:47px;height:47px;padding:11px;border-radius:50%;background:#ddf4e6;color:#168145}
+.picture-design .kahta-design-stat:nth-child(2) svg{background:#fff0d8;color:#ad6806}
+.picture-design .kahta-design-stat span{display:block;font-size:13px;color:#64809b;margin-bottom:7px}
+.picture-design .kahta-design-stat strong{font-size:26px;font-weight:800;color:#168145}
+.picture-design .kahta-design-stat:nth-child(2) strong{color:#ad6806}
+.picture-design #khataList .customer-card{padding:24px!important;gap:18px!important}
+.picture-design #khataList .balance-red{font-size:23px!important;font-weight:800!important}
+.picture-design .design-empty{grid-column:1/-1;padding:40px 20px;border:1px dashed #cddff4;border-radius:13px;background:#f9fcff;text-align:center;color:#7189a7;font-size:14px;line-height:1.6}
+html body.picture-design .page :is(th,td){font-size:12px!important;padding:14px!important}
+html body.picture-design .page th{background:#f0f7ff!important;color:#536d93!important}
+html body.picture-design .money-one-sheet{padding:24px!important}
+html body.picture-design .money-type-switch button.active{background:#0867f1!important;color:white!important}
+html body.picture-design #reports .report-new-card{min-height:120px!important;background:#fff!important}
+html body.picture-design #reports .report-new-card:before{opacity:.7}
+html body.picture-design #reports .report-new-card strong{font-size:25px!important}
+html body.picture-design #adminPanel{background:#edf6ff!important}
+html body.picture-design .admin-section{border-radius:13px!important}
+html body.picture-design .admin-user-head{flex-wrap:wrap!important;align-items:center!important}
+html body.picture-design .admin-pages{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html body.picture-design #authGate{background:radial-gradient(ellipse at 0% 90%,#cbe6ff 0%,transparent 55%),linear-gradient(130deg,#eef7ff,#dff1ff)!important}
+html body.picture-design .auth-card{border-radius:18px!important;border:1px solid #e0edfa!important;box-shadow:0 10px 30px #17447012!important;width:440px!important}
+html body.picture-design .auth-brand h2{font-size:29px!important;color:#12335b!important}
+html body.picture-design .auth-tabs button.active{background:#0867f1!important;color:white!important}
+html body.picture-design .auth-primary{padding:14px!important}
+html body.picture-design .bill-brand{padding:12px!important}
+html body.picture-design .bill-brand-logo{width:44px!important;height:44px!important}
+html body.picture-design .bill-brand-name{font-size:18px!important}
+html body.picture-design #sidebar .logo .brand-circle{border-radius:0!important;box-shadow:none!important}
+}
+@media screen and (min-width:761px){
+html body.picture-design aside#sidebar{width:218px!important;background:linear-gradient(155deg,#103660,#0b2541)!important;border:0!important;padding:20px 12px!important;color:#fff!important}
+html body.picture-design .main{margin-left:218px!important;width:calc(100% - 218px)!important}
+html body.picture-design #sidebar .logo{padding:5px 7px!important;margin-bottom:25px!important}
+html body.picture-design #sidebar .logo .brand-circle{display:flex!important;flex-direction:row!important;justify-content:flex-start!important;gap:10px!important;background:transparent!important;border:0!important;width:100%!important;height:55px!important;padding:0!important;min-height:0!important}
+html body.picture-design #sidebar .logo .brand-icon{width:43px!important;height:43px!important;min-width:43px!important;min-height:43px!important;background:white!important;border-radius:9px!important;overflow:hidden!important}
+html body.picture-design #sidebar .logo .brand-name{color:white!important;font-size:15px!important;text-align:left!important;max-height:none!important;max-width:135px!important}
+html body.picture-design #sidebar .menu button{color:#d2e2f5!important;background:transparent!important;border-color:transparent!important;padding:12px!important;margin:3px 0!important}
+html body.picture-design #sidebar .menu button:hover{background:#ffffff10!important}
+html body.picture-design #sidebar .menu button.active{background:#0867f1!important;color:white!important}
+html body.picture-design .pos-products{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media screen and (min-width:1200px){html body.picture-design .products{grid-template-columns:repeat(4,minmax(0,1fr))!important}.picture-design #dashboard .stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media screen and (min-width:761px) and (max-width:1100px){html body.picture-design #customerList{grid-template-columns:repeat(2,minmax(0,1fr))!important}html body.picture-design .pos{grid-template-columns:minmax(0,1fr)!important}.picture-design .screen-date{display:none}}
+@media screen and (max-width:760px){
+html body.picture-design .content{padding:16px!important}
+html body.picture-design .screen-heading{gap:14px;margin-bottom:18px;align-items:flex-start}
+html body.picture-design .screen-heading h1{font-size:23px!important}.picture-design .screen-heading p{font-size:12px!important}.picture-design .screen-date{display:none}
+html body.picture-design aside.sidebar#sidebar{background:#102f54!important;border-top:1px solid #264c78!important;height:calc(74px + env(safe-area-inset-bottom))!important}
+html body.picture-design #sidebar .menu button{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:5px!important;flex:0 0 auto!important;min-width:72px!important;height:58px!important;padding:7px 10px!important;color:#bcd2ee!important;background:transparent!important;border:0!important;margin:0!important;white-space:nowrap}
+html body.picture-design #sidebar .menu button span{font-size:10px!important}
+html body.picture-design #sidebar .menu button.active{background:#0867f1!important;color:white!important}
+html body.picture-design #sidebarLogoutBtn{margin-top:0!important}
+html body.picture-design .pos,html body.picture-design #dashboard .grid-2{grid-template-columns:minmax(0,1fr)!important}
+html body.picture-design #customerList{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+html body.picture-design #customerList .customer-card{padding:15px!important}
+html body.picture-design #customerList .customer-main-info{grid-template-columns:1fr!important;gap:7px!important}
+.picture-design .customer-avatar{grid-row:auto;width:40px;height:40px}
+html body.picture-design #customerList .customer-main-info strong{font-size:14px!important}
+.picture-design .kahta-design-stat{padding:17px;gap:11px}.picture-design .kahta-design-stat svg{width:39px;height:39px;padding:9px}.picture-design .kahta-design-stat strong{font-size:23px}
+html body.picture-design .admin-pages{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html body.picture-design .professional-recovery .recovery-action-buttons{grid-template-columns:minmax(0,1fr)!important}
+html body.picture-design .report-new-top{flex-wrap:wrap!important}
+html body.picture-design .report-new-search{min-width:0!important;max-width:100%!important}
+html body.picture-design .report-new-search input{width:100%!important;min-width:0!important}
+html body.picture-design .combined-filter-controls>*{max-width:100%!important;min-width:0!important}
+html body.picture-design .modal-box{max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 35px)!important;overflow-y:auto!important}
+html body.picture-design .auth-card{width:440px!important;max-width:calc(100vw - 30px)!important}
+}
+@media screen and (max-width:420px){html body.picture-design #customerList{grid-template-columns:minmax(0,1fr)!important}.picture-design .kahta-design-stat{flex-direction:column;align-items:flex-start}.picture-design .kahta-design-stats{gap:12px}.picture-design #customerList .customer-main-info{grid-template-columns:40px minmax(0,1fr)!important}.picture-design .customer-avatar{grid-row:1/3}html body.picture-design .header{padding:13px!important}}
+@media screen{
+html body.picture-design #khataList .customer-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important}
+.picture-design .design-bill-history{grid-column:1/-1;border:1px solid #e0ebfa;border-radius:10px;overflow:hidden}
+.picture-design .design-bill-history h4{padding:12px 14px;color:#234872!important;background:#f5f9ff;border-bottom:1px solid #e0ebfa;font-size:14px!important}
+.picture-design .design-table-scroll{overflow:auto;max-width:100%;overscroll-behavior-x:contain}
+.picture-design .design-stock-thumb{display:inline-block;width:44px;height:38px;object-fit:contain;vertical-align:middle;margin-right:10px;background:#fff;border:1px solid #e1ebf7;border-radius:8px}
+.picture-design #stock .stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.picture-design #income #moneyDesignStats{margin-top:20px!important}
+}
+@media screen and (max-width:600px){.picture-design #stock .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}.picture-design #stock .low-stock-click-card{grid-column:1/-1}html body.picture-design #khataList .customer-card{grid-template-columns:minmax(0,1fr)!important}.picture-design #khataList .customer-card>div:nth-child(2){text-align:left!important}}
+
+/* Final layout corrections. Financial values still come from original functions. */
+html body #billPreview .receipt-logo,html body #sale .bill-brand-logo,html body #sidebar .brand-icon,html body #authGate .auth-brand .shoe{display:none!important}
+html body #billPreview .receipt-total-line{display:flex!important;align-items:baseline!important;justify-content:space-between!important;gap:12px!important;min-width:0!important;width:100%!important}
+html body #billPreview .receipt-total-line>:first-child{min-width:0!important;flex:1 1 auto!important}
+html body #billPreview .receipt-total-line>:last-child{flex:0 0 auto!important;text-align:right!important;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;font-variant-numeric:tabular-nums}
+html body #billPreview .receipt-product .right{white-space:nowrap!important;text-align:right!important;font-variant-numeric:tabular-nums}
+@media screen{
+html body.picture-design #adminPanel .admin-top h1,html body.picture-design #adminPanel .admin-top p{color:#dc2626!important}
+html body.picture-design #adminPanel .admin-top{background:#fff!important;border-color:#f0d5d8!important}
+html body.picture-design #sidebar .logo .brand-circle{height:auto!important;padding:10px 8px!important;width:100%!important;min-width:0!important;min-height:0!important;justify-content:flex-start!important}
+html body.picture-design #sidebar .logo .brand-name{width:100%!important;max-width:100%!important;max-height:none!important;line-height:1.35!important;font-size:16px!important;white-space:normal!important;overflow:visible!important;text-align:left!important}
+html body.picture-design #sale .cart .bill-brand{display:block!important;padding:14px 16px!important;background:#f4f8ff!important;border:1px solid #deE9fa!important;border-radius:12px!important}
+html body.picture-design #sale .cart .bill-brand-name{font-size:20px!important;color:#15395f!important;overflow-wrap:anywhere}
+html body.picture-design #sale .cart .bill-brand-sub{font-size:11px!important;color:#6b81a1!important}
+html body.picture-design #sale .pos{display:grid!important;grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr)!important;align-items:start!important;gap:22px!important}
+html body.picture-design #sale .cart{width:100%!important;max-width:none!important;min-width:0!important;position:static!important;height:auto!important;overflow:visible!important;padding:22px!important;border-radius:15px!important}
+html body.picture-design #sale .cart #cartItems{height:auto!important;min-height:70px!important;max-height:none!important;overflow:visible!important;padding:10px!important;margin:15px 0!important}
+html body.picture-design #sale .cart #cartItems>p{height:auto!important;min-height:50px!important;padding:15px!important;margin:0!important;display:block!important}
+html body.picture-design #sale .cart .form-group{height:auto!important;padding:0!important;border:0!important;background:transparent!important;margin-bottom:16px!important}
+html body.picture-design #sale .cart label{font-size:12px!important;font-weight:650!important;text-transform:none!important;letter-spacing:0!important;margin-bottom:8px!important;color:#577191!important}
+html body.picture-design #sale .cart .input{height:44px!important;min-height:44px!important;padding:11px 13px!important;background:#fff!important;border:1px solid #d8e5f6!important;border-radius:10px!important;font-size:14px!important}
+html body.picture-design #sale .cart>.total-row{display:flex!important;align-items:baseline!important;justify-content:space-between!important;gap:12px!important;width:100%!important;min-width:0!important;padding:13px 14px!important;border-radius:10px!important;min-height:46px!important;height:auto!important;font-size:14px!important;background:#f7faff!important;border:1px solid #e0eafa!important;margin:10px 0!important}
+html body.picture-design #sale .cart>.total-row> :first-child{min-width:0!important;flex:1 1 auto!important}
+html body.picture-design #sale .cart>.total-row> :last-child{flex:0 0 auto!important;text-align:right!important;white-space:nowrap!important;font-size:17px!important;font-weight:750!important;font-variant-numeric:tabular-nums;line-height:1.35!important}
+html body.picture-design #sale .cart>.total-row.grand{background:#edf5ff!important;border-color:#d1e4fd!important}
+html body.picture-design #sale .cart>.total-row.grand span:last-child{color:#113c70!important;font-size:22px!important}
+html body.picture-design #sale .cart #remaining{color:#b36708!important}
+html body.picture-design #sale .cart>.btn.green{background:#0867f1!important;color:#fff!important;border:1px solid #0867f1!important;border-radius:10px!important;min-height:46px!important;width:100%!important}
+html body.picture-design #sale .pos-products{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
+html body.picture-design #sale .pos-item,html body.picture-design #products .product{height:auto!important;min-height:0!important;overflow:hidden!important;border:1px solid #dce8fa!important;border-radius:13px!important;background:white!important}
+html body.picture-design #sale .pos-item{padding:16px!important}
+html body.picture-design #sale .pos-item .shoe{height:190px!important;min-height:0!important;background:#fff!important;padding:10px!important}
+html body.picture-design #sale .pos-item .shoe img,html body.picture-design #products .product-image img{object-fit:contain!important;width:100%!important;height:100%!important}
+html body.picture-design #sale .pos-item .btn.orange,html body.picture-design #products .product .btn:not(.red),html body.picture-design #purchases .btn.orange{background:#0867f1!important;color:#fff!important;border:1px solid #0867f1!important;box-shadow:none!important}
+html body.picture-design #products .products{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:18px!important}
+html body.picture-design #products .product-image{height:205px!important;background:#fff!important;padding:12px!important}
+html body.picture-design #products .product-body{padding:17px!important}
+html body.picture-design #products .product-body h3{font-size:16px!important;line-height:1.4!important;min-height:0!important;height:auto!important;overflow-wrap:anywhere}
+html body.picture-design #products .product-body .price,html body.picture-design #sale .pos-item .price{white-space:nowrap!important;font-size:20px!important;color:#14355d!important}
+html body.picture-design #purchases .purchase-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:20px!important;align-items:stretch!important}
+html body.picture-design #purchases .purchase-box{padding:23px!important;border:1px solid #dce8fa!important;border-radius:15px!important;background:#fff!important;box-shadow:0 5px 16px #12396808!important}
+html body.picture-design #purchases .purchase-box h3{font-size:20px!important;color:#16395f!important}
+html body.picture-design #purchases .purchase-box .input{font-size:14px!important;background:#fff!important;border:1px solid #dce7f7!important}
+html body.picture-design #purchases .purchase-box .purchase-bulk{min-height:190px!important;height:auto!important}
+html body.picture-design #billModal .modal-box{width:min(540px,calc(100vw - 26px))!important;max-width:540px!important;border-radius:16px!important;padding:20px!important;overflow:auto!important;max-height:calc(100dvh - 32px)!important}
+html body.picture-design #billPreview{width:100%!important;max-width:none!important;min-width:0!important;margin:18px auto 0!important;padding:16px!important;border:1px solid #dce7f6!important;border-radius:11px!important;background:white!important;box-shadow:none!important}
+html body.picture-design #billPreview .receipt-title{font-size:24px!important;line-height:1.4!important;overflow-wrap:anywhere}
+html body.picture-design #billPreview .receipt-total-line{font-size:14px!important;padding:8px 0!important}
+html body.picture-design #billPreview .receipt-total-line.receipt-grand-total{font-size:19px!important;background:#f2f7ff!important;padding:12px!important;border-radius:8px!important}
+html body.picture-design #billPreview .receipt-total-line.balance{color:#b16709!important}
+html body.picture-design #billPreview .receipt-info{font-size:12px!important;gap:8px!important}
+html body.picture-design #billPreview .receipt-info .full{overflow-wrap:anywhere!important}
+}
+@media screen and (max-width:1100px){html body.picture-design #sale .pos{grid-template-columns:minmax(0,1fr)!important}html body.picture-design #products .products{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media screen and (max-width:760px){
+html body.picture-design #sale .cart{padding:17px!important}
+html body.picture-design #purchases .purchase-grid{grid-template-columns:minmax(0,1fr)!important}
+html body.picture-design #products .products,html body.picture-design #sale .pos-products{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+html body.picture-design #products .product-image,html body.picture-design #sale .pos-item .shoe{height:155px!important;padding:8px!important}
+html body.picture-design #products .product-body,html body.picture-design #sale .pos-item{padding:12px!important}
+html body.picture-design #products .product-body .price,html body.picture-design #sale .pos-item .price{font-size:17px!important}
+html body.picture-design #sale .cart>.total-row.grand span:last-child{font-size:20px!important}
+html body.picture-design #billModal .modal-box{padding:12px!important}
+html body.picture-design #billPreview{padding:12px!important}
+}
+@media print{
+html body #billPreview .receipt-total-line>:last-child{font-size:inherit!important;white-space:nowrap!important}
+}
+
+/* Compact 80mm bill: retain its original receipt dimensions. */
+@media screen{
+html body.picture-design #sidebar{padding-top:18px!important}
+html body.picture-design #sidebar .menu{margin-top:0!important;padding-top:0!important}
+html body.picture-design #billModal .modal-box{width:min(360px,calc(100vw - 24px))!important;max-width:360px!important;padding:12px!important}
+html body.picture-design #billPreview{width:80mm!important;max-width:100%!important;margin:12px auto!important;padding:4mm 3mm!important}
+html body.picture-design #billPreview .receipt-title{font-size:20px!important;line-height:1.25!important}
+html body.picture-design #billPreview .receipt-info{font-size:9px!important;gap:4px!important}
+html body.picture-design #billPreview .receipt-total-line{font-size:10px!important;padding:4px 0!important;gap:6px!important}
+html body.picture-design #billPreview .receipt-total-line.receipt-grand-total{font-size:13px!important;padding:6px!important}
+html body.picture-design #billPreview .receipt-total-line.receipt-grand-total>span:last-child{font-size:13px!important}
+}
+
+/* The current bill spans the sale page; product browsing follows below. */
+@media screen{
+html body.picture-design #sale .pos{display:flex!important;flex-direction:column!important;gap:22px!important}
+html body.picture-design #sale .pos>div{width:100%!important;min-width:0!important}
+html body.picture-design #sale .pos>.cart{order:-1!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;column-gap:18px!important;row-gap:0!important;border-top:3px solid #2f6da9!important;padding:24px!important;box-shadow:0 6px 22px #163f720a!important}
+html body.picture-design #sale .cart>*{grid-column:1/-1!important;min-width:0!important}
+html body.picture-design #sale .cart>.form-group{grid-column:auto!important;margin-top:8px!important}
+html body.picture-design #sale .cart>.customer-bill-contact{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px!important}
+html body.picture-design #sale .cart .bill-brand{background:#f4f8ff!important;margin-bottom:12px!important}
+html body.picture-design #sale .cart>h2{font-size:18px!important;margin:16px 0 6px!important;padding-bottom:10px!important;border-bottom:1px solid #e1eafa!important}
+html body.picture-design #sale .cart>.total-row.grand{color:#173b64!important;border:1px solid #cfe0f5!important;background:#edf5ff!important}
+html body.picture-design #sale .cart>.btn.green{background:#176c55!important;border-radius:10px!important;min-height:46px!important}
+html body.picture-design #sale .pos-products{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media screen and (max-width:900px){html body.picture-design #sale .pos>.cart{grid-template-columns:repeat(2,minmax(0,1fr))!important}html body.picture-design #sale .pos-products{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media screen and (max-width:600px){
+html body.picture-design #sale .pos>.cart{grid-template-columns:minmax(0,1fr)!important;padding:16px!important}
+html body.picture-design #sale .cart>.customer-bill-contact{grid-template-columns:minmax(0,1fr)!important;gap:0!important}
+html body.picture-design #sale .pos-products{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+/* Receipt TOTAL must never inherit the application shell's .main offset. */
+html body #billPreview .receipt-total-line.receipt-grand-total{
+margin:5px 0!important;width:100%!important;max-width:100%!important;min-width:0!important;
+position:static!important;left:auto!important;right:auto!important;transform:none!important;
+display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;align-items:center!important;
+gap:8px!important;box-sizing:border-box!important;overflow:visible!important;
+}
+html body #billPreview .receipt-total-line.receipt-grand-total>:first-child{font-size:12px!important;white-space:nowrap!important}
+html body #billPreview .receipt-total-line.receipt-grand-total>:last-child{font-size:13px!important;text-align:right!important;white-space:nowrap!important;line-height:1.35!important}
+@media print{
+html body #billPreview .receipt-total-line.receipt-grand-total{background:#fff!important;border-radius:0!important;padding:6px 0!important;color:#000!important}
+}
+
+/* Shoe photos, quantity controls and saved bill alignment. */
+@media screen{
+html body.picture-design #sale .pos-item .shoe,html body.picture-design #products .product-image{
+ width:100%!important;height:230px!important;aspect-ratio:auto!important;padding:0!important;margin:0 0 12px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:0!important;border-radius:9px!important;background:#f5f8fc!important;overflow:hidden!important;
+}
+html body.picture-design #sale .sale-photo{cursor:pointer}
+html body.picture-design #sale .sale-photo>span{display:block;width:100%;height:100%}
+html body.picture-design #sale .pos-item .shoe img,html body.picture-design #products .product-image img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center!important;border-radius:0!important}
+html body.picture-design #sale .sale-stock-label{margin:8px 0;font-size:12px;font-weight:700;color:#16734c;min-height:18px}
+html body.picture-design #sale .out-of-stock{color:#c62828}
+html body.picture-design #sale .sale-quantity,html body.picture-design #sale .cart-quantity{display:flex;align-items:center;gap:8px;justify-content:center}
+html body.picture-design #sale .sale-quantity{margin:8px 0}
+html body.picture-design #sale .sale-quantity button,html body.picture-design #sale .cart-quantity button{flex:0 0 34px;width:34px;height:34px;padding:0;border:1px solid #cdddf0;border-radius:8px;background:#eef5ff;color:#174f91;font-size:21px;cursor:pointer}
+html body.picture-design #sale .sale-quantity input{width:65px;min-width:0;height:34px;border:1px solid #cdddf0;border-radius:8px;text-align:center;background:white;color:#16395f;font-size:15px;font-weight:700}
+html body.picture-design #sale .cart-quantity strong{min-width:24px;text-align:center}
+html body.picture-design #sale .sale-quantity button:disabled,html body.picture-design #sale .cart-quantity button:disabled{opacity:.4;cursor:default}
+html body.picture-design #sale .cart-product-bottom{flex-wrap:wrap!important;gap:12px!important}
+html body.picture-design #bills table{table-layout:auto!important;min-width:850px!important;width:100%!important}
+html body.picture-design #bills th,html body.picture-design #bills td{word-break:normal!important;overflow-wrap:normal!important;vertical-align:middle!important}
+html body.picture-design #bills th,html body.picture-design #bills td:nth-child(1),html body.picture-design #bills td:nth-child(2),html body.picture-design #bills td:nth-child(4),html body.picture-design #bills td:nth-child(5),html body.picture-design #bills td:nth-child(6){white-space:nowrap!important}
+html body.picture-design #bills td:last-child{width:230px!important;min-width:230px!important}
+html body.picture-design #bills .bill-actions{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:6px!important;width:max-content!important}
+html body.picture-design #bills .bill-actions .btn{width:auto!important;min-width:0!important;flex:0 0 auto!important;white-space:nowrap!important;padding:9px 11px!important;margin:0!important}
+}
+@media screen and (max-width:760px){html body.picture-design #sale .pos-item .shoe,html body.picture-design #products .product-image{height:180px!important}}
+
+</style>
+<script id="shoes-handler-history">
+function toggleHandlerHistory(){const box=document.getElementById('handlerHistory'),btn=document.getElementById('handlerToggle');box.hidden=!box.hidden;btn.setAttribute('aria-expanded',String(!box.hidden));btn.querySelector('span').textContent=box.hidden?'Show history':'Hide history';if(!box.hidden)renderHandlerHistory();}
+let handlerSearchCache=null;
+function invalidateHandlerSearch(){handlerSearchCache=null;}
+function handlerSearchRows(){if(!handlerSearchCache||handlerSearchCache.source!==bills){handlerSearchCache={source:bills,rows:bills.map(b=>({bill:b,date:reportDateObject(b.date),amounts:billAmounts(b),staff:String(b.handledBy||'Not recorded').normalize('NFKC').toLowerCase(),text:[b.handledBy||'Not recorded',b.customer,b.number,b.customerPhone,b.customerAddress,...(b.items||[]).flatMap(i=>[i.name,i.code,i.size])].join(' ').normalize('NFKC').toLowerCase()}))};}return handlerSearchCache.rows;}
+function renderHandlerHistory(){const out=document.getElementById('handlerRows');if(!out)return;const period=document.getElementById('handlerPeriod').value,q=document.getElementById('handlerSearch').value.trim().toLowerCase(),from=document.getElementById('handlerFrom').value,to=document.getElementById('handlerTo').value;
+ const e=escapeHtml;const rangeInvalid=period==='manual'&&from&&to&&from>to;const terms=q.normalize('NFKC').split(/\s+/).filter(Boolean);const rows=handlerSearchRows(),staffMatch=terms.length>0&&rows.some(row=>terms.every(term=>row.staff.includes(term)));const selected=rows.filter(row=>{const b=row.bill,d=row.date;if(!d||rangeInvalid)return false;const iso=moneyISO(d);return (period==='manual'?(!from||iso>=from)&&(!to||iso<=to):isInReportPeriod(b.date,period))&&terms.every(term=>(staffMatch?row.staff:row.text).includes(term));});
+ const groups=new Map();let total=0,paid=0,due=0;for(const row of selected){const b=row.bill,a=row.amounts,name=b.handledBy||'Not recorded',g=groups.get(name)||{count:0,total:0,paid:0,due:0};g.count++;g.total+=a.total;g.paid+=a.paid;g.due+=a.remaining;groups.set(name,g);total+=a.total;paid+=a.paid;due+=a.remaining;}
+ document.getElementById('handlerSummary').textContent=selected.length+' bills • Net sales '+money(total)+' • Received '+money(paid)+' • Remaining '+money(due);
+ for(const [id,value] of [['handlerCount',selected.length],['handlerSales',money(total)],['handlerPaid',money(paid)],['handlerDue',money(due)]]){const el=document.getElementById(id);if(el)el.textContent=value;}
+ document.getElementById('handlerGroups').innerHTML=[...groups].map(([n,g])=>`<tr><td>${e(n)}</td><td>${g.count}</td><td>${money(g.total)}</td><td>${money(g.paid)}</td><td>${money(g.due)}</td></tr>`).join('')||'<tr><td colspan="5">No bills in this period.</td></tr>';
+ out.innerHTML=selected.map(row=>{const b=row.bill,a=row.amounts;return `<tr><td>${e(b.number)}<br><small>${e(reportDateObject(b.date)?.toLocaleString()||b.date)}</small></td><td>${e(b.handledBy||'Not recorded')}</td><td>${e(b.customer)}${b.customerPhone?'<small>'+e(b.customerPhone)+'</small>':''}</td><td>${money(a.total)}</td><td>${money(a.paid)}</td><td><span class="hh-badge ${a.remaining?'hh-pending':'hh-paid'}">${money(a.remaining)}</span><span class="hh-status ${a.remaining?'hh-pending-text':'hh-paid-text'}">${a.remaining?'Pending':'Paid'}</span></td></tr>`;}).join('')||'<tr><td colspan="6">No bills in this period.</td></tr>';
+}
+
+const handlerPreviousRenderAll=renderAll;
+renderAll=function(){handlerPreviousRenderAll();invalidateHandlerSearch();renderHandlerHistory();};
+const handlerPreviousSave=save;
+save=function(){invalidateHandlerSearch();return handlerPreviousSave();};
+renderHandlerHistory();
+
+</script>
+<script id="shoes-picture-ui">
+/* Presentation only: read existing state and decorate existing controls. */
+(function(){
+ const icons={dashboard:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',sale:'M3 3h2l3 12h10l3-9H6 M9 20h.01 M18 20h.01',products:'M5 15l4-9 4 4 7 3v6H3v-3z',stock:'M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10',purchases:'M5 8h14l2 13H3z M8 8V6a4 4 0 0 1 8 0v2',customers:'M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M2 21v-2a7 7 0 0 1 14 0v2 M17 4a4 4 0 0 1 0 8 M19 15a5 5 0 0 1 3 5',khata:'M5 3h14v18H5z M9 8h6 M9 12h6 M9 16h4',bills:'M6 3h9l4 4v14H6z M15 3v5h4 M10 12h5 M10 16h5',income:'M3 6h18v13H3z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6 M6 10v5 M18 10v5',reports:'M4 21V11 M11 21V6 M18 21V2',logout:'M9 3H3v18h6 M8 12h13 M16 7l5 5-5 5'};
+ const labels={dashboard:['Shop overview','Your sales, stock and customer balances at a glance.'],sale:['New Sale','Create a bill and keep stock and customer balances in sync.'],products:['Products','Manage your footwear collection and prices.'],stock:['Stock Management','Track available pairs by product and size.'],purchases:['Purchases','Add new purchases and manage purchase history.'],customers:['Customers','Manage customer details and account balances.'],khata:['Customer Kahta','View customer balances and collect outstanding payments.'],bills:['Saved Bills','View, return and print your saved invoices.'],income:['Income / Expenses','Record shop income and expenses and view history.'],reports:['Reports','Review business performance and bill handler history.']};
+ function icon(key){const n=document.createElementNS('http://www.w3.org/2000/svg','svg');n.setAttribute('viewBox','0 0 24 24');n.setAttribute('fill','none');n.setAttribute('stroke','currentColor');n.setAttribute('stroke-width','1.7');n.setAttribute('stroke-linecap','round');n.setAttribute('stroke-linejoin','round');n.setAttribute('aria-hidden','true');const p=document.createElementNS(n.namespaceURI,'path');p.setAttribute('d',icons[key]||icons.bills);n.append(p);return n;}
+ function text(tag,value,cls){const n=document.createElement(tag);n.textContent=value;if(cls)n.className=cls;return n;}
+ function setup(){
+  document.body.classList.add('picture-design');
+  for(const [id,[title,subtitle]] of Object.entries(labels)){const page=document.getElementById(id);if(!page||page.querySelector('.screen-heading'))continue;const h=document.createElement('div');h.className='screen-heading';const group=document.createElement('div');group.append(text('h1',title),text('p',subtitle));h.append(group);const date=text('span',new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'}),'screen-date');h.append(date);page.prepend(h);}
+  document.querySelectorAll('#sidebar .menu button').forEach(btn=>{const raw=btn.getAttribute('onclick')||'',match=raw.match(/showPage\('([^']+)'/),key=match?match[1]:'logout';const label=match?(key==='income'?'Income / Expenses':key==='khata'?'Kahta':key.charAt(0).toUpperCase()+key.slice(1)):'Logout';btn.replaceChildren(icon(key),text('span',label));btn.title=label;});
+  const dashboard=document.getElementById('dashboard'),recovery=dashboard?.querySelector('.professional-recovery');if(recovery)dashboard.append(recovery);
+  const moneyPage=document.querySelector('#income .money-one-sheet');if(moneyPage&&!document.getElementById('moneyDesignStats')){const row=document.createElement('div');row.id='moneyDesignStats';row.className='kahta-design-stats';for(const [id,label] of [['incomeDesignTotal','Cash Income'],['expenseDesignTotal','Expenses']]){const card=document.createElement('div');card.className='kahta-design-stat';card.append(icon('income'));const group=document.createElement('div');group.append(text('span',label),text('strong','Rs 0'));group.lastChild.id=id;card.append(group);row.append(card);}const head=moneyPage.querySelector('.money-entry-head');head?.after(row);}
+  const kahta=document.getElementById('khata');if(kahta&&!document.getElementById('kahtaDesignStats')){const row=document.createElement('div');row.id='kahtaDesignStats';row.className='kahta-design-stats';for(const [id,label,key] of [['kahtaCollectedView','Total Received','income'],['kahtaOutstandingView','Total Outstanding','khata']]){const card=document.createElement('div');card.className='kahta-design-stat';card.append(icon(key));const t=document.createElement('div');t.append(text('span',label),text('strong','Rs 0'));t.lastChild.id=id;card.append(t);row.append(card);}kahta.querySelector('.screen-heading').after(row);}
+ }
+ function decorate(){
+  const incomeTotal=document.getElementById('incomeDesignTotal'),expenseTotal=document.getElementById('expenseDesignTotal');if(incomeTotal)incomeTotal.textContent=money(incomes.reduce((n,x)=>n+Number(x.amount||0),0));if(expenseTotal)expenseTotal.textContent=money(expenses.reduce((n,x)=>n+Number(x.amount||0),0));
+  const received=document.getElementById('kahtaCollectedView'),due=document.getElementById('kahtaOutstandingView');if(received)received.textContent=money(incomes.filter(x=>x.type==='khata').reduce((n,x)=>n+Number(x.amount||0),0));if(due)due.textContent=money(customers.reduce((n,c)=>n+Number(c.balance||0),0));
+  const list=document.getElementById('customerList');list?.querySelectorAll('.customer-card').forEach((card,i)=>{const info=card.querySelector('.customer-main-info');if(!info||card.querySelector('.customer-avatar'))return;const name=info.querySelector('strong')?.textContent||'Customer';const avatar=text('div',name.split(/\s+/).slice(0,2).map(s=>s[0]).join('').toUpperCase(),'customer-avatar avatar-'+i%3);info.prepend(avatar);const actions=card.querySelector('.customer-actions'),balance=actions?.querySelector('.customer-balance');if(balance)card.insertBefore(balance,actions);});
+  const kahtaQuery=(document.getElementById('khataCustomerSearch')?.value||'').trim().toLowerCase();const debtors=customers.filter(c=>c.balance>0&&(!kahtaQuery||String(c.name||'').toLowerCase().includes(kahtaQuery)));
+  document.querySelectorAll('#khataList .customer-card').forEach((card,index)=>{if(card.querySelector('.design-bill-history'))return;const c=debtors[index];if(!c)return;const history=document.createElement('div');history.className='design-bill-history';history.append(text('h4','Bill History'));const scroll=document.createElement('div');scroll.className='design-table-scroll';const table=document.createElement('table'),thead=document.createElement('thead'),tr=document.createElement('tr');for(const label of ['Invoice','Total','Paid','Remaining'])tr.append(text('th',label));thead.append(tr);table.append(thead);const body=document.createElement('tbody');for(const b of bills.filter(b=>String(b.customerId)===String(c.id))){const a=billAmounts(b),r=document.createElement('tr');for(const v of [b.number,money(a.total),money(a.paid),money(a.remaining)])r.append(text('td',v));body.append(r);}table.append(body);scroll.append(table);history.append(scroll);card.append(history);});
+  document.querySelectorAll('#stockTable tr').forEach(row=>{const cell=row.children[1],code=row.children[0]?.textContent;if(!cell||cell.querySelector('img'))return;const p=products.find(p=>String(p.code)===String(code));if(p?.image){const img=document.createElement('img');img.src=p.image;img.alt=p.name||'Shoe';img.className='design-stock-thumb';cell.prepend(img);}});
+  if(list&&!list.children.length)list.append(text('div','No customers yet. Add your first customer to get started.','design-empty'));
+  for(const id of ['productGrid','posProducts']){const el=document.getElementById(id);if(el&&!el.children.length)el.append(text('div',id==='productGrid'?'No products yet. Add your first product.':'No products available. Add products and purchase stock first.','design-empty'));}
+  document.querySelectorAll('#dashboard .stat .icon').forEach((el,i)=>{if(el.querySelector('svg'))return;el.replaceChildren(icon(['reports','reports','income','khata','products','stock','customers','bills'][i]));});
+ }
+ const oldRender=renderAll;renderAll=function(){oldRender();decorate();};
+ const oldCustomers=renderCustomers;renderCustomers=function(){oldCustomers();decorate();};
+ setup();decorate();
+})();
+
+</script>
+
+<script id="cloudinary-product-uploads">
+let imageUploadBusy=false;
+saveProduct=async function(){if(imageUploadBusy)return;if(!accountLoaded)return appAlert('Load your account first.');const name=document.getElementById('newName').value.trim(),code=document.getElementById('newCode').value.trim(),file=document.getElementById('newImage').files[0];if(!name||!code)return appAlert('Enter product name and code.');if(products.some(p=>p.code.toLowerCase()===code.toLowerCase()))return appAlert('Product code already exists.');imageUploadBusy=true;try{let image='',imagePublicId='';if(file){if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)||file.size>5*1024*1024)throw Error('Choose JPG, PNG, WebP or GIF up to 5 MB.');const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('Could not read image.'));r.readAsDataURL(file);});appNotice('Uploading product image…','success');const result=await api('/media/images',{method:'POST',body:JSON.stringify({image:data})});if(!result.secure_url)throw new Error('Upload response has no photo URL. Check backend deployment.');image=result.secure_url;imagePublicId=result.public_id;}
+ products.push({id:Date.now(),name,code,purchase:0,price:0,stock:{},image,imagePublicId});save();closeModal('productModal');renderAll();appNotice('Product saved.','success');}catch(err){appAlert(err.message||'Upload failed. Product was not added.');}finally{imageUploadBusy=false;}};
+const linkedEditProduct=editProduct;
+editProduct=async function(id){await linkedEditProduct(id);const p=products.find(p=>p.id===id);if(!p)return;if(!await appConfirm('Replace the product photo?'))return;const picker=document.createElement('input');picker.type='file';picker.accept='image/jpeg,image/png,image/webp,image/gif';picker.onchange=async()=>{const f=picker.files[0];if(!f)return;try{if(f.size>5*1024*1024)throw Error('Maximum photo size is 5 MB.');const image=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(f);});const d=await api('/media/images',{method:'POST',body:JSON.stringify({image})});p.image=d.secure_url;p.imagePublicId=d.public_id;save();renderAll();}catch(e){appAlert(e.message||'Photo upload failed.');}};picker.click();};
+
+</script>
+<style>
+@media screen {html body.picture-design #sale .pos-item .shoe,html body.picture-design #products .product-image{height:260px!important;background:#fff!important;}html body.picture-design #sale .pos-item .shoe img,html body.picture-design #products .product-image img{object-fit:contain!important;object-position:center!important;}html body.picture-design #sale .cart-product-image img{object-fit:contain!important;background:#fff!important;}}
+@media screen and (max-width:760px){html body.picture-design #sale .pos-item .shoe,html body.picture-design #products .product-image{height:200px!important;}}
 </style>
