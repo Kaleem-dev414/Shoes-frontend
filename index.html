@@ -7948,7 +7948,8 @@ const originalAccountSave=save;save=function(){originalAccountSave();return queu
 
 function showPage(id,btn){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");document.getElementById("headerTitle").textContent=document.querySelector("#"+id+" h1")?.textContent||"Sajid Shoes";document.getElementById("sidebar").classList.remove("open");renderAll()}
 function toggleMenu(){document.getElementById("sidebar").classList.toggle("open")}
-function renderProducts(){let s=(document.getElementById("productSearch")?.value||"").toLowerCase(),g=document.getElementById("productGrid");g.innerHTML="";products.filter(p=>p.name.toLowerCase().includes(s)||p.code.toLowerCase().includes(s)).forEach(p=>{let total=Object.values(p.stock).reduce((a,b)=>a+b,0);g.innerHTML+=`<div class="product"><div class="product-image">${p.image?`<img src="${p.image}">`:"👟"}</div><div class="product-body"><small>${p.code}</small><h3>${p.name}</h3><div class="price">${money(p.price)}</div><div class="stock">📦 ${total} pairs available</div>
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+function renderProducts(){let s=(document.getElementById("productSearch")?.value||"").toLowerCase(),g=document.getElementById("productGrid");g.innerHTML="";products.filter(p=>p.name.toLowerCase().includes(s)||p.code.toLowerCase().includes(s)).forEach(p=>{let total=Object.values(p.stock||{}).reduce((a,b)=>a+b,0);g.innerHTML+=`<div class="product"><div class="product-image">${p.image?`<img src="${p.image}">`:"👟"}</div><div class="product-body"><small>${p.code}</small><h3>${p.name}</h3><div class="price">${money(p.price)}</div><div class="stock">📦 ${total} pairs available</div>
 <div style="display:flex;gap:8px;margin-top:12px">
 <button class="btn" style="width:50%;background:#2563eb;color:#fff" onclick="editProduct(${p.id})">✏️ Edit</button>
 <button class="btn red" style="width:50%" onclick="deleteProduct(${p.id})">🗑 Delete</button>
@@ -8427,7 +8428,7 @@ function openLowStockDetails(){
  let rows=[];
  products.forEach(p=>{
    if(!p||!p.stock||typeof p.stock!=="object")return;
-   Object.entries(p.stock).forEach(([size,qty])=>{
+   Object.entries(p.stock||{}).forEach(([size,qty])=>{
      qty=Number(qty||0);
      if(qty<5&&!p.discontinued)rows.push({p,size,qty});
    });
@@ -8449,7 +8450,7 @@ function openLowStockDetails(){
 function renderStock(){
  let search=(document.getElementById("stockSearch")?.value||"").toLowerCase().trim(),h="",totalPairs=0,low=0;
  products.forEach(p=>{
-   Object.entries(p.stock).forEach(([s,q])=>{
+   Object.entries(p.stock||{}).forEach(([s,q])=>{
      totalPairs+=Number(q||0);if(Number(q||0)<5&&!p.discontinued)low++;
      let hay=`${p.code} ${p.name} ${s}`.toLowerCase();
      if(search&&!hay.includes(search))return;
@@ -8516,7 +8517,7 @@ async function openStockAdd(){
  save();renderAll();
 }
 function renderPurchase(){let e=document.getElementById("purchaseProduct");e.innerHTML=products.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");e.onchange=renderPurchaseSizes;renderPurchaseSizes()}
-function renderPurchaseSizes(){let p=products.find(x=>x.id===Number(document.getElementById("purchaseProduct").value));if(p)document.getElementById("purchaseSize").innerHTML=Object.keys(p.stock).map(s=>`<option value="${s}">${s}</option>`).join("")}
+function renderPurchaseSizes(){let p=products.find(x=>x.id===Number(document.getElementById("purchaseProduct").value));if(p)document.getElementById("purchaseSize").innerHTML=Object.keys(p.stock||{}).map(s=>`<option value="${s}">${s}</option>`).join("")}
 function addStock(){let id=Number(document.getElementById("purchaseProduct").value),s=document.getElementById("purchaseSize").value,q=Number(document.getElementById("purchaseQty").value);if(!q||q<=0)return;let p=products.find(x=>x.id===id);p.stock[s]=(p.stock[s]||0)+q;save();renderAll();appAlert(`${q} pairs added to ${p.name}, Size ${s}.`)}
 function openProductModal(){document.getElementById("productModal").classList.add("show")}function closeModal(id){document.getElementById(id).classList.remove("show")}
 function saveProduct(){
@@ -8756,7 +8757,10 @@ function backupData(){
   document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
 
-function renderAll(){renderPurchases();
+function normalizeProductStock(){
+ products.forEach(p=>{if(p&&(!p.stock||typeof p.stock!=='object'||Array.isArray(p.stock)))p.stock={};});
+}
+function renderAll(){normalizeProductStock();renderPurchases();
  try{renderProducts()}catch(e){console.warn(e)}
  try{renderPOS()}catch(e){console.warn(e)}
  try{renderCustomers()}catch(e){console.warn(e)}
@@ -11191,7 +11195,7 @@ function saveSession(d){localStorage.setItem('sajid_auth_token',d.token);localSt
  location.reload();
 }
 function applyUserPages(user){window.lowStockAlertsEnabled=user?.lowStockAlertsEnabled!==false;const reset=document.getElementById('userAuthorizedReset');if(reset)reset.style.display=user?.allowSelfReset?'inline-flex':'none';const pages={...(user?.pages||{}),reports:true};document.querySelectorAll('.menu button[onclick*="showPage"]').forEach(btn=>{const m=btn.getAttribute('onclick').match(/showPage\('([^']+)'/);if(m)btn.style.display=pages[m[1]]===false?'none':''})}
-async function loadUserState(){accountLoaded=false;try{const d=await api('/state'),x=d.data||{};products=x.products||[];customers=x.customers||[];bills=x.bills||[];expenses=x.expenses||[];incomes=x.incomes||[];purchases=x.purchases||[];saveLocalOnly();renderAll();accountLoaded=true;if(d.restoreNotice)showRestoreNotice(d.restoreNotice)}catch(e){console.warn(e);accountLoaded=false;appAlert("Unable to load saved account data. Changes are disabled until you sign in again.")}}
+async function loadUserState(){accountLoaded=false;try{const d=await api('/state'),x=d.data||{};products=x.products||[];normalizeProductStock();customers=x.customers||[];bills=x.bills||[];expenses=x.expenses||[];incomes=x.incomes||[];purchases=x.purchases||[];saveLocalOnly();renderAll();accountLoaded=true;if(d.restoreNotice)showRestoreNotice(d.restoreNotice)}catch(e){console.warn(e);accountLoaded=false;appAlert("Unable to load saved account data. Changes are disabled until you sign in again.")}}
 function showRestoreNotice(n){
  if(!n||document.getElementById('restoreNoticeCard'))return;
  const card=document.createElement('div');card.id='restoreNoticeCard';card.style.cssText='position:fixed;right:18px;top:82px;z-index:120000;max-width:390px;background:#fff;border:1px solid #bbf7d0;border-left:5px solid #16a34a;border-radius:14px;padding:15px 16px;box-shadow:0 14px 35px rgba(15,23,42,.16);color:#172033';
@@ -11221,7 +11225,6 @@ document.addEventListener('click',function(e){
  e.stopPropagation();
  deleteAdminUser(btn.dataset.userId,btn);
 });
-function escapeHtml(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 async function approveUser(id){try{const users=(await api('/admin/users')).users||[],u=users.find(x=>String(x.id)===String(id));if(!u)return appAlert('User not found.');const name=u.requestedShopName||'Sajid Shoes';if(!await appConfirm('Approve '+u.username+' with requested shop name: '+name+'?'))return;const address=await appPrompt('Permanent shop address for '+name+':',u.shopAddress||'');if(address===null)return;const contact=await appPrompt('Permanent shop contact number for '+name+':',u.shopContact||'');if(contact===null)return;const result=await api('/admin/users/'+id+'/approve',{method:'PATCH',body:JSON.stringify({shopAddress:address.trim(),shopContact:contact.trim()})});appNotice('Approved: '+(result.shopName||name),'success');await loadAdminUsers()}catch(e){appAlert(e.message)}}async function deleteAdminUser(id,button){
  if(!id){appAlert('User ID missing.','Delete User Error');return}
  const name=button?.closest('.admin-user-card')?.querySelector('b')?.textContent?.trim()||'this user';
@@ -12225,7 +12228,7 @@ renderHandlerHistory();
 <script id="cloudinary-product-uploads">
 let imageUploadBusy=false;
 saveProduct=async function(){if(imageUploadBusy)return;if(!accountLoaded)return appAlert('Load your account first.');const name=document.getElementById('newName').value.trim(),code=document.getElementById('newCode').value.trim(),file=document.getElementById('newImage').files[0];if(!name||!code)return appAlert('Enter product name and code.');if(products.some(p=>p.code.toLowerCase()===code.toLowerCase()))return appAlert('Product code already exists.');imageUploadBusy=true;try{let image='',imagePublicId='';if(file){if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)||file.size>5*1024*1024)throw Error('Choose JPG, PNG, WebP or GIF up to 5 MB.');const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('Could not read image.'));r.readAsDataURL(file);});appNotice('Uploading product image…','success');const result=await api('/media/images',{method:'POST',body:JSON.stringify({image:data})});if(!result.secure_url)throw new Error('Upload response has no photo URL. Check backend deployment.');image=result.secure_url;imagePublicId=result.public_id;}
- products.push({id:Date.now(),name,code,purchase:0,price:0,stock:{},image,imagePublicId});save();closeModal('productModal');renderAll();appNotice('Product saved.','success');}catch(err){appAlert(err.message||'Upload failed. Product was not added.');}finally{imageUploadBusy=false;}};
+ products.push({id:Date.now(),name,code,purchase:0,price:0,stock:{},image,imagePublicId});if(document.getElementById('productSearch'))document.getElementById('productSearch').value='';renderAll();await save();if(lastSaveError)throw Error('Photo uploaded and product is visible locally, but account save failed: '+lastSaveError.message);closeModal('productModal');appNotice('Product saved.','success');}catch(err){appAlert(err.message||'Product save failed.');}finally{imageUploadBusy=false;}};
 const linkedEditProduct=editProduct;
 editProduct=async function(id){await linkedEditProduct(id);const p=products.find(p=>p.id===id);if(!p)return;if(!await appConfirm('Replace the product photo?'))return;const picker=document.createElement('input');picker.type='file';picker.accept='image/jpeg,image/png,image/webp,image/gif';picker.onchange=async()=>{const f=picker.files[0];if(!f)return;try{if(f.size>5*1024*1024)throw Error('Maximum photo size is 5 MB.');const image=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(f);});const d=await api('/media/images',{method:'POST',body:JSON.stringify({image})});p.image=d.secure_url;p.imagePublicId=d.public_id;save();renderAll();}catch(e){appAlert(e.message||'Photo upload failed.');}};picker.click();};
 
