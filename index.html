@@ -7950,9 +7950,9 @@ function showPage(id,btn){document.querySelectorAll(".page").forEach(p=>p.classL
 function toggleMenu(){document.getElementById("sidebar").classList.toggle("open")}
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
 function renderProducts(){let s=(document.getElementById("productSearch")?.value||"").toLowerCase(),g=document.getElementById("productGrid");g.innerHTML="";products.filter(p=>p.name.toLowerCase().includes(s)||p.code.toLowerCase().includes(s)).forEach(p=>{let total=Object.values(p.stock||{}).reduce((a,b)=>a+b,0);g.innerHTML+=`<div class="product"><div class="product-image">${p.image?`<img src="${p.image}">`:"👟"}</div><div class="product-body"><small>${p.code}</small><h3>${p.name}</h3><div class="price">${money(p.price)}</div><div class="stock">📦 ${total} pairs available</div>
-<div style="display:flex;gap:8px;margin-top:12px">
-<button class="btn" style="width:50%;background:#2563eb;color:#fff" onclick="editProduct(${p.id})">✏️ Edit</button>
-<button class="btn red" style="width:50%" onclick="deleteProduct(${p.id})">🗑 Delete</button>
+<div class="product-actions">
+<button class="btn" style="background:#2563eb;color:#fff" onclick="editProduct(${p.id})">✏️ Edit</button>
+<button class="btn red" onclick="deleteProduct(${p.id})">🗑 Delete</button>
 </div></div></div>`})}
 
 
@@ -8200,6 +8200,21 @@ function updateReturnAvailable(input){
  if(qty>original)qty=original;
  cell.textContent=Math.max(0,original-qty);
 }
+function reconcileReturnedBillMoney(b,oldTotal,refund){
+ const round=n=>Math.round(Math.max(0,Number(n)||0)*100)/100;
+ let left=round(refund);const affected=new Set();
+ // Reduce only receipts linked to this bill, including later Kahta collections.
+ for(const entry of incomes){
+  if(left<=0)break;
+  if(Array.isArray(entry.allocations)){
+   for(const a of entry.allocations){if(String(a.billId)!==String(b.id))continue;const used=Math.min(left,round(a.amount));if(used>0)affected.add(entry);a.amount=round(a.amount-used);entry.amount=round(entry.amount-used);left=round(left-used);}
+   entry.allocations=entry.allocations.filter(a=>Number(a.amount)>0);
+  }else if(String(entry.billId)===String(b.id)||String(entry.id)==='sale-'+b.id){const used=Math.min(left,round(entry.amount));if(used>0)affected.add(entry);entry.amount=round(entry.amount-used);left=round(left-used);}
+ }
+ incomes=incomes.filter(entry=>!affected.has(entry)||Number(entry.amount)>0);
+ const ratio=oldTotal>0?Math.min(1,Math.max(0,Number(b.total)/oldTotal)):0;
+ expenses=expenses.filter(entry=>{if(String(entry.billId)!==String(b.id))return true;entry.amount=round(Number(entry.amount)*ratio);return entry.amount>0;});
+}
 async function saveEditableReturn(){
  const b=bills.find(x=>x.id===window.currentReturnBillId);
  if(!b)return;
@@ -8213,7 +8228,10 @@ async function saveEditableReturn(){
  });
  if(document.querySelector("#returnItemsBody .return-qty-input[data-invalid=\"1\"]"))return appAlert("Please enter a valid return quantity.");
  if(!selected.length)return appAlert("Enter return quantity for at least one product.");
- let totalAmount=selected.reduce((sum,x)=>sum+x.qty*Number(b.items[x.index].price||0),0);
+ const oldTotal=Math.max(0,Number(b.total||0));
+ const itemSubtotal=b.items.reduce((sum,i)=>sum+Number(i.qty||0)*Number(i.price||0),0);
+ const rawReturn=selected.reduce((sum,x)=>sum+x.qty*Number(b.items[x.index].price||0),0);
+ let totalAmount=Math.min(oldTotal,Math.round((itemSubtotal>0?rawReturn*oldTotal/itemSubtotal:0)*100)/100);
  let oldRemaining=Number(b.remaining||0),khataReduction=Math.min(oldRemaining,totalAmount),refund=Math.max(0,totalAmount-khataReduction);
  const summary=selected.map(x=>{const i=b.items[x.index];return `Code: ${itemCode(i)} | Product: ${i.name} | Size: ${i.size} | Quantity: ${x.qty}`}).join("\n");
  if(!await appConfirm(`CONFIRM RETURN\n\n${summary}\n\nReturn value: ${money(totalAmount)}\nKahta reduced: ${money(khataReduction)}\nRefund due: ${money(refund)}`))return;
@@ -8233,8 +8251,7 @@ async function saveEditableReturn(){
  b.remaining=Math.max(0,oldRemaining-khataReduction);b.total=Math.max(0,Number(b.total||0)-totalAmount);b.subtotal=Math.max(0,Number(b.subtotal||0)-totalAmount);b.paid=Math.max(0,Number(b.paid||0)-refund);
  let c=customers.find(x=>x.id===b.customerId);if(c&&khataReduction>0)c.balance=Math.max(0,Number(c.balance||0)-khataReduction);
  b.returns.push(returnRecord);
- const saleReceipt=incomes.find(x=>x.type==='sale'&&String(x.billId)===String(b.id));
- if(saleReceipt&&refund>0)saleReceipt.amount=Math.max(0,Math.round((Number(saleReceipt.amount||0)-refund)*100)/100);
+ reconcileReturnedBillMoney(b,oldTotal,refund);
  save();renderAll();closeModal("returnModal");showBill(b.id);
 }
 async function deleteBill(id){
@@ -11270,9 +11287,12 @@ async function adminResetShop(id){
 }
 
 async function loadUserBackups(id,btn){
+ const panel=document.getElementById('backup-'+id);
+ if(btn&&panel&&panel.style.display==='block'){panel.style.display='none';btn.textContent='View Data';btn.setAttribute('aria-expanded','false');return;}
  try{
   const d=await api('/admin/users/'+id+'/data'),box=document.getElementById('backup-'+id),x=d.state||{};adminExportCache.set(String(id),{format:'sajid-shoes-account-backup-v1',userId:String(id),username:document.querySelector('[data-user-id=\"'+id+'\"]')?.closest('.admin-user-card')?.querySelector('b')?.textContent||id,createdAt:new Date().toISOString(),state:structuredClone(x)});
   box.style.display='block';
+  const toggle=btn||box.closest('.admin-user-card')?.querySelector('button[onclick*="loadUserBackups"]');if(toggle){toggle.textContent='Hide Data';toggle.setAttribute('aria-expanded','true');}
   const labels={products:'Products',customers:'Customers',bills:'Sales / Bills',purchases:'Purchases',incomes:'Income',expenses:'Expenses'};
   const sum=(arr,key)=> (arr||[]).reduce((a,r)=>a+Number(r[key]||0),0);
   const initial=(x.bills||[]).reduce((a,b)=>a+Math.max(0,Number(b.paid||0)-(b.payments||[]).reduce((v,p)=>v+Number(p.amount||0),0)),0);
@@ -12236,4 +12256,121 @@ editProduct=async function(id){await linkedEditProduct(id);const p=products.find
 <style>
 @media screen {html body.picture-design #sale .pos-item .shoe,html body.picture-design #products .product-image{height:260px!important;background:#fff!important;}html body.picture-design #sale .pos-item .shoe img,html body.picture-design #products .product-image img{object-fit:contain!important;object-position:center!important;}html body.picture-design #sale .cart-product-image img{object-fit:contain!important;background:#fff!important;}}
 @media screen and (max-width:760px){html body.picture-design #sale .pos-item .shoe,html body.picture-design #products .product-image{height:200px!important;}}
+</style>
+
+<style id="product-action-layout-fix">
+html body #products #productGrid .product-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;width:100%!important;margin-top:12px!important;}
+html body #products #productGrid .product-actions>.btn{position:static!important;inset:auto!important;transform:none!important;width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;box-sizing:border-box!important;padding:10px 4px!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;font-size:12px!important;line-height:1.3!important;}
+</style>
+
+<style id="screen-fit-return-update">
+@media screen{
+html:root,html body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;overscroll-behavior-x:none!important;}
+html body .app{width:100%!important;min-width:0!important;max-width:100%!important;}
+html body .main{min-width:0!important;max-width:100%!important;box-sizing:border-box!important;}
+html body .content,html body .page,html body .page.active{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;}
+html body .page :is(.card,.panel,.toolbar,.products,.pos-products,.product,.pos-item,.product-body,.grid-2,.purchase-layout,.hh-panel,.money-one-sheet,.report-new-shell){min-width:0!important;max-width:100%!important;box-sizing:border-box!important;}
+html body .toolbar{flex-wrap:wrap!important;}
+html body .page :is(input,select,textarea){min-width:0!important;max-width:100%!important;box-sizing:border-box!important;}
+html body .page :is(.table-wrap,.table-responsive,.design-table-scroll,.hh-table-scroll,.card:has(>table)){min-width:0!important;max-width:100%!important;overflow-x:auto!important;overscroll-behavior-x:contain!important;}
+html body #products #productGrid .product-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;width:100%!important;}
+html body #products #productGrid .product-actions>.btn{flex:1 1 80px!important;width:auto!important;min-width:0!important;max-width:100%!important;min-height:38px!important;padding:9px 8px!important;white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.3!important;}
+}
+@media screen and (max-width:760px){
+html body .main{width:100%!important;margin-left:0!important;}
+html body #products #productGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;}
+html body .page :is(.grid-2,.pos,.purchase-layout,.money-entry-grid){grid-template-columns:minmax(0,1fr)!important;}
+html body .page .toolbar>.input{flex:1 1 100%!important;width:100%!important;}
+}
+@media screen and (max-width:380px){html body #products #productGrid{grid-template-columns:minmax(0,1fr)!important;}}
+</style>
+
+<style id="final-responsive-screen-fit">
+@media screen{
+html body.picture-design .app{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;}
+html body.picture-design .main{box-sizing:border-box!important;min-width:0!important;}
+html body.picture-design .main .content{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;}
+html body.picture-design .main .content .page{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;}
+html body.picture-design .page>*,html body.picture-design .page :is(.stats,.stat,.toolbar,.card,.panel,.pos,.cart,.grid-2,.purchase-layout,.report-new-shell,.hh-panel,.combined-filter-controls,.money-one-sheet)>*{min-width:0!important;box-sizing:border-box!important;}
+html body.picture-design .page :is(.stats,.toolbar,.card,.panel,.pos,.cart,.grid-2,.purchase-layout,.report-new-shell,.hh-panel,.combined-filter-controls,.money-one-sheet){max-width:100%!important;min-width:0!important;box-sizing:border-box!important;}
+html body.picture-design .page .screen-heading{flex-wrap:wrap!important;}
+html body.picture-design .page :is(img,svg){max-width:100%;}
+html body.picture-design .page :is(.table-wrap,.table-responsive,.design-table-scroll,.hh-table-scroll,.card:has(table)){max-width:100%!important;min-width:0!important;overflow-x:auto!important;}
+html body.picture-design #products #productGrid .product-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;align-items:start!important;}
+html body.picture-design #products #productGrid .product-actions>button.btn{display:flex!important;position:static!important;width:100%!important;min-width:0!important;height:32px!important;min-height:32px!important;max-height:32px!important;margin:0!important;padding:5px 3px!important;font-size:11px!important;line-height:1!important;white-space:nowrap!important;gap:3px!important;border-radius:7px!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;}
+}
+@media screen and (min-width:761px){html body.picture-design .app>.main{margin-left:218px!important;margin-right:0!important;width:calc(100% - 218px)!important;max-width:calc(100% - 218px)!important;}}
+@media screen and (max-width:760px){
+html body.picture-design .app>.main{margin:0!important;width:100%!important;max-width:100%!important;left:auto!important;right:auto!important;transform:none!important;padding:0!important;}
+html body.picture-design .main .content{padding:12px 12px 94px!important;}
+html body.picture-design .page :is(.grid-2,.pos,.purchase-layout,.money-entry-grid,.report-new-grid){grid-template-columns:minmax(0,1fr)!important;}
+html body.picture-design .page .toolbar{display:flex!important;flex-wrap:wrap!important;width:100%!important;}
+html body.picture-design .page .toolbar>*{max-width:100%!important;min-width:0!important;}
+html body.picture-design .page .toolbar>.input{width:100%!important;flex:1 1 100%!important;}
+html body.picture-design #products #productGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important;gap:10px!important;}
+html body.picture-design #products #productGrid>.product{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;}
+html body.picture-design #products #productGrid .product-body{padding:10px!important;}
+html body.picture-design #stock .stats{width:100%!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;}
+html body.picture-design #stock .low-stock-click-card{grid-column:1/-1!important;}
+html body.picture-design .modal-box{box-sizing:border-box!important;width:calc(100% - 24px)!important;max-width:calc(100% - 24px)!important;min-width:0!important;max-height:calc(100dvh - 24px)!important;overflow:auto!important;}
+}
+@media screen and (max-width:340px){html body.picture-design #products #productGrid{grid-template-columns:minmax(0,1fr)!important;}}
+</style>
+
+<style id="balanced-layout-sidebar-fix">
+@media screen{
+html:root,html body.picture-design{margin:0!important;padding-left:0!important;padding-right:0!important;min-width:0!important;width:100%!important;max-width:100%!important;}
+html body.picture-design .app>.main{position:relative!important;inset:auto!important;transform:none!important;margin:0!important;padding:0!important;min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;}
+html body.picture-design .app>.main>.content{position:relative!important;inset:auto!important;transform:none!important;margin:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;padding-inline:clamp(12px,2vw,24px)!important;}
+html body.picture-design .main .content>.page{margin-inline:0!important;left:auto!important;right:auto!important;transform:none!important;width:100%!important;max-width:100%!important;min-width:0!important;}
+html body.picture-design aside.sidebar#sidebar{box-sizing:border-box!important;transform:none!important;translate:none!important;}
+html body.picture-design #sidebar .menu button{box-sizing:border-box!important;transform:none!important;overflow:visible!important;}
+html body.picture-design #sidebar .menu button svg{display:block!important;visibility:visible!important;opacity:1!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;max-width:20px!important;max-height:20px!important;flex:0 0 20px!important;margin:0!important;position:static!important;transform:none!important;}
+html body.picture-design #sidebar .menu button span{min-width:0!important;max-width:100%!important;}
+}
+@media screen and (min-width:761px){
+html body.picture-design .app{display:grid!important;grid-template-columns:218px minmax(0,1fr)!important;align-items:start!important;}
+html body.picture-design .app>.main{grid-column:2!important;}
+html body.picture-design aside.sidebar#sidebar{position:fixed!important;left:0!important;right:auto!important;top:0!important;bottom:0!important;width:218px!important;height:100dvh!important;max-height:100dvh!important;overflow-y:auto!important;overflow-x:hidden!important;}
+html body.picture-design #sidebar .menu{display:flex!important;flex-direction:column!important;width:100%!important;min-width:0!important;gap:4px!important;}
+html body.picture-design #sidebar .menu button{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;width:100%!important;min-width:0!important;height:auto!important;min-height:44px!important;white-space:normal!important;}
+}
+@media screen and (max-width:760px){
+html body.picture-design .app{display:block!important;}
+html body.picture-design .app>.main{grid-column:auto!important;}
+html body.picture-design aside.sidebar#sidebar{position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;max-width:100%!important;height:calc(76px + env(safe-area-inset-bottom))!important;min-height:76px!important;padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;overflow:hidden!important;z-index:10000!important;}
+html body.picture-design #sidebar>.logo{display:none!important;}
+html body.picture-design #sidebar .menu{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:6px!important;width:100%!important;max-width:100%!important;min-width:0!important;height:64px!important;margin:0!important;padding:0!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch;}
+html body.picture-design #sidebar .menu button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;flex:0 0 76px!important;width:76px!important;min-width:76px!important;max-width:76px!important;height:60px!important;min-height:60px!important;padding:6px 3px!important;margin:0!important;gap:5px!important;}
+html body.picture-design #sidebar .menu button span{font-size:10px!important;line-height:1.15!important;white-space:normal!important;text-align:center!important;}
+html body.picture-design .app>.main>.content{padding-bottom:calc(94px + env(safe-area-inset-bottom))!important;}
+}
+</style>
+
+<style id="sidebar-full-icons">
+@media screen{
+html body.picture-design aside#sidebar.sidebar .menu button svg{overflow:visible!important;clip:auto!important;clip-path:none!important;flex-shrink:0!important;}
+}
+@media screen and (min-width:761px){
+html body.picture-design aside#sidebar.sidebar{padding:16px 12px!important;overflow-x:hidden!important;direction:ltr!important;}
+html body.picture-design aside#sidebar.sidebar>.menu{position:static!important;inset:auto!important;transform:none!important;margin:0!important;padding:0!important;max-width:100%!important;height:auto!important;overflow:visible!important;align-items:stretch!important;}
+html body.picture-design aside#sidebar.sidebar>.menu>button{display:grid!important;grid-template-columns:22px minmax(0,1fr)!important;justify-content:stretch!important;align-items:center!important;text-align:left!important;gap:10px!important;padding:11px 12px!important;margin:0!important;min-width:0!important;width:100%!important;max-width:100%!important;position:static!important;inset:auto!important;transform:none!important;text-indent:0!important;direction:ltr!important;}
+html body.picture-design aside#sidebar.sidebar>.menu>button>svg{grid-column:1!important;justify-self:center!important;}
+html body.picture-design aside#sidebar.sidebar>.menu>button>span{grid-column:2!important;text-align:left!important;overflow-wrap:anywhere!important;}
+}
+</style>
+<script>
+(function(){function resetDesktopSidebarScroll(){if(window.matchMedia('(min-width:761px)').matches){const sidebar=document.getElementById('sidebar');if(sidebar){sidebar.scrollLeft=0;const menu=sidebar.querySelector('.menu');if(menu)menu.scrollLeft=0;}}}window.addEventListener('load',resetDesktopSidebarScroll);window.addEventListener('resize',resetDesktopSidebarScroll);})();
+</script>
+
+<style id="edge-to-edge-product-photos">
+@media screen{
+html body.picture-design #products #productGrid .product{padding:0!important;overflow:hidden!important;}
+html body.picture-design #products #productGrid .product-image{padding:0!important;margin:0!important;width:100%!important;max-width:100%!important;border:0!important;border-radius:0!important;display:block!important;}
+html body.picture-design #products #productGrid .product-image img,html body.picture-design #sale .pos-item .shoe img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;margin:0!important;padding:0!important;object-fit:cover!important;object-position:center!important;border:0!important;border-radius:0!important;}
+html body.picture-design #sale .pos-item{padding:0!important;overflow:hidden!important;}
+html body.picture-design #sale .pos-item .shoe{display:block!important;padding:0!important;margin:0!important;width:100%!important;max-width:100%!important;border:0!important;border-radius:0!important;}
+html body.picture-design #sale .pos-item>:not(.shoe){margin-left:12px!important;margin-right:12px!important;max-width:calc(100% - 24px)!important;}
+html body.picture-design #sale .pos-item>:last-child{margin-bottom:12px!important;}
+}
 </style>
