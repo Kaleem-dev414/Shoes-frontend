@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#111827">
+<script id="shoe-install-support">if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(err => console.warn('Service worker unavailable:', err)); }); }</script>
+
 <!-- backend link for connection -->
   <script>window.SAJID_API_URL = ["localhost","127.0.0.1","::1"].includes(location.hostname)?"/api":"https://shoes-backend-sb5h.onrender.com/api";</script>
 
